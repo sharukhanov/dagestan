@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+# Скачанные книги и извлечённый текст — не храним в репозитории.
+research/*
+!research/sources-found.md
+!research/README.md

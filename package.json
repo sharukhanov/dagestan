@@ -1,0 +1,32 @@
+{
+  "name": "dagestan",
+  "private": true,
+  "version": "0.1.0",
+  "description": "История Дагестана — интерактивная карта с временной шкалой",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run validate && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "validate": "tsx scripts/validate-data.ts",
+    "add-image": "tsx scripts/add-image.ts",
+    "build-basemap": "bash scripts/build-basemap.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharukhanov/dagestan.git"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.12.0"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.6.4",
+    "mapshaper": "^0.7.76",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "zod": "^4.6.5"
+  }
+}
