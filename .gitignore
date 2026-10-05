@@ -6,3 +6,4 @@ dist/
 research/*
 !research/sources-found.md
 !research/README.md
+!research/fetch.sh
