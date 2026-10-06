@@ -23,3 +23,16 @@ npm run preview    # посмотреть собранную версию
 - **Современная** — тёмный рельеф.
 
 В обеих нет современных границ и подписей. Рельеф строится из открытых [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/), вода — из [Natural Earth](https://www.naturalearthdata.com/) (`npm run build-basemap` пересобирает `public/basemap/`).
+
+## Публикация
+
+Сайт собирается и публикуется GitHub Actions при каждом пуше в `main` (`.github/workflows/deploy.yml`).
+Пути в сборке относительные, поэтому один и тот же билд работает и на `https://sharukhanov.github.io/dagestan/`,
+и на собственном домене.
+
+### Свой домен (sharukhanov.com)
+
+1. У регистратора домена добавить DNS-записи:
+   - `A` для `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - `CNAME` для `www` → `sharukhanov.github.io`
+2. В GitHub: Settings → Pages → Custom domain → `sharukhanov.com` → Save; после проверки DNS включить **Enforce HTTPS**.
