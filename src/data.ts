@@ -7,10 +7,13 @@ import politiesRaw from '../data/polities.geojson?raw';
 import type { DateParts, Epoch, HistEvent, Place, PolityProps, Source } from './schema';
 import type { FeatureCollection, Polygon, MultiPolygon } from 'geojson';
 
-export const epochs = (epochsJson as Epoch[]).slice().sort((a, b) => a.start - b.start);
+export const epochs = (epochsJson as unknown as Epoch[])
+  .map((e) => ({ ...e, subperiods: e.subperiods ?? [] }))
+  .sort((a, b) => a.start - b.start);
 export const events = (eventsJson as unknown as HistEvent[]).map((e) => ({
   ...e,
   related: e.related ?? [],
+  details: e.details ?? [],
   sources: e.sources ?? [],
   evidence: e.evidence ?? [],
   image: e.image ?? null,
@@ -78,6 +81,7 @@ function partLabel(d: DateParts, precision: HistEvent['datePrecision']): string 
 }
 
 export function formatEventDate(e: HistEvent): string {
+  if (e.dateLabel) return e.dateLabel;
   const start = partLabel(e.start, e.datePrecision);
   let s = start;
   if (e.end && (e.end.year !== e.start.year || e.end.month !== e.start.month || e.end.day !== e.start.day)) {

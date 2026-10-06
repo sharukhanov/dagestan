@@ -27,6 +27,12 @@ export const EvidenceSchema = z.object({
   quote: z.string().min(10),
 });
 
+export const DetailSchema = z.object({
+  /** Метка слева: дата или короткий заголовок («1839», «июнь–август 1839», «Деталь»). */
+  label: z.string(),
+  text: z.string(),
+});
+
 export const ImageSchema = z.object({
   /** Путь внутри public/, например "images/events/gunib.webp". */
   file: z.string(),
@@ -45,6 +51,8 @@ export const EventSchema = z.object({
   start: DatePartsSchema,
   end: DatePartsSchema.nullable().optional(),
   datePrecision: z.enum(['day', 'month', 'year', 'decade', 'century', 'approx']),
+  /** Своя подпись даты вместо автоматической: «III тыс. до н. э.», «10–9 тыс. лет назад». */
+  dateLabel: z.string().optional(),
   /** Короткая оговорка о дате: «по разным данным…», «по старому стилю…». */
   dateNote: z.string().optional(),
   place: z.string(),
@@ -52,6 +60,8 @@ export const EventSchema = z.object({
   epoch: id,
   summary: z.string(),
   whyImportant: z.string(),
+  /** «Подробнее»: хронология и интересные детали — по пункту на строку. */
+  details: z.array(DetailSchema).default([]),
   related: z.array(z.object({ id, relation: z.enum(['before', 'ledTo']) })).default([]),
   image: ImageSchema.nullable().default(null),
   sources: z.array(SourceRefSchema).default([]),
@@ -68,6 +78,13 @@ export const EpochSchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   /** Откуда взята периодизация (издание и раздел). */
   periodization: SourceRefSchema.optional(),
+  /** Подпериоды по главам источника — тонкие метки на шкале. */
+  subperiods: z.array(z.object({
+    title: z.string(),
+    start: year,
+    end: year,
+    periodization: SourceRefSchema.optional(),
+  })).default([]),
   note: z.string().optional(),
 });
 
@@ -94,6 +111,8 @@ export const SourceSchema = z.object({
   type: z.enum(['collective', 'monograph', 'primary', 'article', 'reference', 'web']),
   url: z.string().url().optional(),
   note: z.string().optional(),
+  /** Имя текстового файла в research/txt/ (без .txt) — по нему проверяются цитаты evidence. */
+  researchFile: z.string().optional(),
 });
 
 export const PolityPropsSchema = z.object({
@@ -114,4 +133,5 @@ export type Epoch = z.infer<typeof EpochSchema>;
 export type Place = z.infer<typeof PlaceSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type PolityProps = z.infer<typeof PolityPropsSchema>;
+export type Detail = z.infer<typeof DetailSchema>;
 export type ImageInfo = z.infer<typeof ImageSchema>;

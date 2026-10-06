@@ -34,6 +34,14 @@ function imageBlock(ev: HistEvent): string {
     </figure>`;
 }
 
+function detailsBlock(ev: HistEvent): string {
+  if (!ev.details.length) return '';
+  const rows = ev.details
+    .map((d) => `<li><span class="d-label">${esc(d.label)}</span><span class="d-text">${esc(d.text)}</span></li>`)
+    .join('');
+  return `<section class="card-details"><h3>Подробнее</h3><ol>${rows}</ol></section>`;
+}
+
 function relatedBlock(ev: HistEvent): string {
   const groups: Record<string, string[]> = { before: [], ledTo: [] };
   for (const r of ev.related) {
@@ -91,6 +99,7 @@ function render(ev: HistEvent): string {
         ${ev.dateNote ? `<p class="card-datenote">${esc(ev.dateNote)}</p>` : ''}
         <p class="card-summary">${esc(ev.summary)}</p>
         <p class="card-why"><b>Почему это важно.</b> ${esc(ev.whyImportant)}</p>
+        ${detailsBlock(ev)}
         ${relatedBlock(ev)}
         ${sourcesBlock(ev)}
       </div>

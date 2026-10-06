@@ -1,38 +1,70 @@
 [
-  { "id": "antiquity", "title": "Древность и Кавказская Албания", "start": -800, "end": 250, "color": "#8c7a5b",
-    "summary": "Ранние племенные союзы, скифские и сарматские походы, Кавказская Албания на юге.",
-    "note": "Временные рамки предварительные — будут сверены с периодизацией академических изданий." },
-  { "id": "sasanids", "title": "Сасаниды и Дербент", "start": 250, "end": 650, "color": "#a0674b",
-    "summary": "Иран укрепляет Дербентский проход и строит каменные стены против кочевников.",
-    "note": "Временные рамки предварительные." },
-  { "id": "khazars-arabs", "title": "Хазары, арабы и ислам", "start": 650, "end": 1000, "color": "#6f8a5e",
-    "summary": "Арабо-хазарские войны за Дербент, начало распространения ислама.",
-    "note": "Временные рамки предварительные." },
-  { "id": "medieval", "title": "Средневековые владения", "start": 1000, "end": 1220, "color": "#5d7f8c",
-    "summary": "Серир, Кайтаг, Лакз, Дербентский эмират и другие владения.",
-    "note": "Временные рамки предварительные." },
-  { "id": "mongols-timur", "title": "Монголы и Тимур", "start": 1220, "end": 1400, "color": "#7a5d8c",
-    "summary": "Монгольские походы, Золотая Орда, нашествие Тимура.",
-    "note": "Временные рамки предварительные." },
-  { "id": "khanates", "title": "Ханства и вольные общества", "start": 1400, "end": 1720, "color": "#8c6a3f",
-    "summary": "Шамхальство, ханства, уцмийство и союзы сельских общин.",
-    "note": "Временные рамки предварительные." },
-  { "id": "empires", "title": "Персия, Османы и Россия", "start": 1720, "end": 1813, "color": "#9a5650",
-    "summary": "Три империи спорят за Кавказ; поход Надир-шаха.",
-    "note": "Временные рамки предварительные." },
-  { "id": "caucasian-war", "title": "Кавказская война и имамат", "start": 1813, "end": 1859, "color": "#7e4a4a",
-    "summary": "Сопротивление горцев, имамат Шамиля.",
-    "note": "Временные рамки предварительные." },
-  { "id": "russian-empire", "title": "В составе Российской империи", "start": 1859, "end": 1917, "color": "#5f6f8f",
-    "summary": "Дагестанская область, восстание 1877 года, первые заводы и железная дорога.",
-    "note": "Временные рамки предварительные." },
-  { "id": "revolution", "title": "Революция и Гражданская война", "start": 1917, "end": 1921, "color": "#a04848",
-    "summary": "Горская республика, белые, красные и турецкие войска.",
-    "note": "Временные рамки предварительные." },
-  { "id": "soviet", "title": "Советский период", "start": 1921, "end": 1991, "color": "#8a4f5f",
-    "summary": "Дагестанская АССР, индустриализация, война, переселения.",
-    "note": "Временные рамки предварительные." },
-  { "id": "modern", "title": "Современный Дагестан", "start": 1991, "end": 2026, "color": "#4f7f7a",
+  {
+    "id": "ancient", "title": "Древность и Кавказская Албания", "start": -8000, "end": 300, "color": "#8c7a5b",
+    "summary": "От первых поселений в горах до Кавказской Албании и сарматских кочевий.",
+    "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 1 «Первобытнообщинный строй и зарождение классового общества на территории Дагестана»", "pages": "с. 9–156" },
+    "subperiods": [
+      { "title": "Каменный век", "start": -8000, "end": -3000, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, гл. 1–2", "pages": "с. 9–46" } },
+      { "title": "Бронзовый век", "start": -3000, "end": -900, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, гл. 3", "pages": "с. 47–96" } },
+      { "title": "Ранний железный век", "start": -900, "end": -300, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, гл. 4", "pages": "с. 97–125" } },
+      { "title": "Кавказская Албания", "start": -300, "end": 300, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, гл. 5", "pages": "с. 126–156" } }
+    ],
+    "note": "Палеолит в шкалу не включён: в Дагестане его памятники единичны, а шкала стала бы слишком длинной."
+  },
+  {
+    "id": "medieval", "title": "Дагестан в IV–XV веках", "start": 300, "end": 1500, "color": "#7d6a8f",
+    "summary": "Сасаниды и Дербент, хазары, арабы и ислам, Серир и Кайтаг, монголы и Тимур.",
+    "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 2 «Дагестан в IV–XV веках»", "pages": "с. 157–298" },
+    "subperiods": [
+      { "title": "IV–VI вв.: Сасаниды и Дербент", "start": 300, "end": 600, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 2, гл. 1", "pages": "с. 157–175" } },
+      { "title": "VII–X вв.: хазары и Арабский халифат", "start": 600, "end": 1000, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 2, гл. 2", "pages": "с. 176–192" } },
+      { "title": "XI — первая половина XIII в.", "start": 1000, "end": 1220, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 2, гл. 3", "pages": "с. 193–223" } },
+      { "title": "XIII–XV вв.: монголы и Тимур", "start": 1220, "end": 1500, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 2, гл. 4", "pages": "с. 224–262" } }
+    ]
+  },
+  {
+    "id": "early-modern", "title": "Дагестан в XVI–XVIII веках", "start": 1500, "end": 1800, "color": "#8c6a3f",
+    "summary": "Шамхальство, ханства и союзы сельских общин между Ираном, Османами и Россией.",
+    "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 3 «Дагестан в XVI–XVIII веках»", "pages": "с. 299–452" },
+    "subperiods": [
+      { "title": "XVI–XVII вв.", "start": 1500, "end": 1700, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 3, гл. 1–3", "pages": "с. 299–413" } },
+      { "title": "Начало XVIII в.: поход Петра I", "start": 1700, "end": 1734, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 3, гл. 4", "pages": "с. 414–436" } },
+      { "title": "Нашествие Надир-шаха", "start": 1734, "end": 1747, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 3, гл. 5", "pages": "с. 437–452" } }
+    ]
+  },
+  {
+    "id": "xix-first-half", "title": "Первая половина XIX века", "start": 1800, "end": 1859, "color": "#7e4a4a",
+    "summary": "Вхождение в состав России, Кавказская война и имамат Шамиля.",
+    "periodization": { "id": "istoriya-dagestana-1968-t2", "section": "разд. I «Дагестан в первой половине XIX в.»", "pages": "с. 9–118" },
+    "subperiods": [
+      { "title": "Присоединение к России", "start": 1800, "end": 1829, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 4, гл. 1–2", "pages": "с. 453–493" } },
+      { "title": "Движение горцев: 1829–1839", "start": 1829, "end": 1840, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 4, гл. 3, § 1", "pages": "с. 494" } },
+      { "title": "Имамат Шамиля", "start": 1840, "end": 1859, "periodization": { "id": "istoriya-dagestana-2004", "section": "т. I, разд. 4, гл. 3, § 2", "pages": "с. 494–515" } }
+    ]
+  },
+  {
+    "id": "xix-second-half", "title": "Дагестанская область: 1860-е — 1917", "start": 1859, "end": 1917, "color": "#5f6f8f",
+    "summary": "Реформы 1860-х, восстание 1877 года, первые заводы и железная дорога.",
+    "periodization": { "id": "istoriya-dagestana-1968-t2", "section": "разд. II", "pages": "с. 119–358" }
+  },
+  {
+    "id": "revolution", "title": "Революция и Гражданская война", "start": 1917, "end": 1921, "color": "#a04848",
+    "summary": "Горская республика, красные, белые и турецкие войска, образование ДАССР.",
+    "periodization": { "id": "istoriya-dagestana-1968-t3", "section": "разд. I (1917–1921)", "pages": "с. 9–144" }
+  },
+  {
+    "id": "soviet", "title": "Советский период", "start": 1921, "end": 1991, "color": "#8a4f5f",
+    "summary": "Дагестанская АССР: индустриализация, война, переселения, послевоенная жизнь.",
+    "periodization": { "id": "istoriya-dagestana-1968-t3", "section": "разд. II–III; далее т. IV (1969)", "pages": "с. 145–415" },
+    "subperiods": [
+      { "title": "1921–1941", "start": 1921, "end": 1941, "periodization": { "id": "istoriya-dagestana-1968-t3", "section": "разд. II", "pages": "с. 145–342" } },
+      { "title": "Великая Отечественная война", "start": 1941, "end": 1945, "periodization": { "id": "istoriya-dagestana-1968-t3", "section": "разд. III", "pages": "с. 343–415" } },
+      { "title": "1945–1991", "start": 1945, "end": 1991, "periodization": { "id": "istoriya-dagestana-1969-t4", "section": "гл. I–IV (до 1966 г.)" } }
+    ]
+  },
+  {
+    "id": "modern", "title": "Современный Дагестан", "start": 1991, "end": 2026, "color": "#4f7f7a",
     "summary": "Республика Дагестан в составе Российской Федерации.",
-    "note": "Временные рамки предварительные." }
+    "note": "Академической периодизации для этого времени в найденных источниках нет; события добавляются, только если подтверждены источником."
+  }
 ]

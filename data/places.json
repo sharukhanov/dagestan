@@ -1,24 +1,179 @@
 [
-  { "id": "derbent", "name": "Дербент", "altNames": ["Чол", "Баб аль-Абваб"], "type": "city",
-    "coords": [48.289, 42.058], "start": -700, "end": null, "approx": true,
-    "note": "Дата начала условная; уточняется по источникам." },
-  { "id": "tarki", "name": "Тарки", "type": "settlement",
-    "coords": [47.463, 42.948], "start": 1000, "end": null, "approx": true,
-    "note": "Резиденция шамхалов; дата начала условная." },
-  { "id": "khunzakh", "name": "Хунзах", "type": "settlement",
-    "coords": [46.712, 42.540], "start": 1000, "end": null, "approx": true,
-    "note": "Центр Аварского нуцальства; дата начала условная." },
-  { "id": "kubachi", "name": "Кубачи", "altNames": ["Зерехгеран"], "type": "settlement",
-    "coords": [47.600, 42.083], "start": 900, "end": null, "approx": true,
-    "note": "Дата начала условная." },
-  { "id": "kizlyar", "name": "Кизляр", "type": "fortress",
-    "coords": [46.713, 43.847], "start": 1735, "end": null, "approx": false },
-  { "id": "gunib", "name": "Гуниб", "type": "settlement",
-    "coords": [46.962, 42.389], "start": 1500, "end": null, "approx": true,
-    "note": "Дата начала условная." },
-  { "id": "temir-khan-shura", "name": "Темир-Хан-Шура", "altNames": ["Буйнакск"], "type": "fortress",
-    "coords": [47.117, 42.818], "start": 1834, "end": null, "approx": true },
-  { "id": "petrovsk", "name": "Петровское — Махачкала", "altNames": ["Петровск-Порт", "Махачкала"], "type": "city",
-    "coords": [47.504, 42.984], "start": 1844, "end": null, "approx": true,
-    "note": "Укрепление Петровское; с 1857 г. город Петровск, с 1921 г. Махачкала. Даты будут сверены." }
+  {
+    "id": "derbent",
+    "name": "Дербент",
+    "altNames": [
+      "Чол",
+      "Баб аль-Абваб"
+    ],
+    "type": "city",
+    "coords": [
+      48.289,
+      42.058
+    ],
+    "start": -700,
+    "end": null,
+    "approx": true,
+    "note": "Дата начала условная; уточняется по источникам."
+  },
+  {
+    "id": "tarki",
+    "name": "Тарки",
+    "type": "settlement",
+    "coords": [
+      47.463,
+      42.948
+    ],
+    "start": 1300,
+    "end": null,
+    "approx": true,
+    "note": "Резиденция шамхалов. Как селение упоминается уже при походе Тимура (т. I, с. 231); дата начала условная."
+  },
+  {
+    "id": "khunzakh",
+    "name": "Хунзах",
+    "type": "settlement",
+    "coords": [
+      46.712,
+      42.54
+    ],
+    "start": 700,
+    "end": null,
+    "approx": true,
+    "note": "Крепость Хунзах упоминается при походе Марвана 738–739 гг. (т. I, с. 180)."
+  },
+  {
+    "id": "kubachi",
+    "name": "Кубачи",
+    "altNames": [
+      "Зерехгеран"
+    ],
+    "type": "settlement",
+    "coords": [
+      47.6,
+      42.083
+    ],
+    "start": 900,
+    "end": null,
+    "approx": true,
+    "note": "Дата начала условная."
+  },
+  {
+    "id": "kizlyar",
+    "name": "Кизляр",
+    "type": "fortress",
+    "coords": [
+      46.713,
+      43.847
+    ],
+    "start": 1735,
+    "end": null,
+    "approx": false
+  },
+  {
+    "id": "gunib",
+    "name": "Гуниб",
+    "type": "settlement",
+    "coords": [
+      46.962,
+      42.389
+    ],
+    "start": 1500,
+    "end": null,
+    "approx": true,
+    "note": "Дата начала условная."
+  },
+  {
+    "id": "temir-khan-shura",
+    "name": "Темир-Хан-Шура",
+    "altNames": [
+      "Буйнакск"
+    ],
+    "type": "fortress",
+    "coords": [
+      47.117,
+      42.818
+    ],
+    "start": 1834,
+    "end": null,
+    "approx": true
+  },
+  {
+    "id": "petrovsk",
+    "name": "Петровское — Махачкала",
+    "altNames": [
+      "Петровск-Порт",
+      "Махачкала"
+    ],
+    "type": "city",
+    "coords": [
+      47.504,
+      42.984
+    ],
+    "start": 1844,
+    "end": null,
+    "approx": true,
+    "note": "Укрепление Петровское; с 1857 г. город Петровск, с 1921 г. Махачкала. Даты будут сверены."
+  },
+  {
+    "id": "semender",
+    "name": "Семендер",
+    "altNames": [
+      "Самандар"
+    ],
+    "type": "city",
+    "coords": [
+      47.43,
+      42.97
+    ],
+    "start": 562,
+    "end": 966,
+    "approx": true,
+    "note": "Первая столица Хазарского каганата; большинство авторов отождествляют его с городищем в Тарки. Разрушен Святославом (т. I, с. 171, 209)."
+  },
+  {
+    "id": "balanjar",
+    "name": "Баланджар",
+    "altNames": [
+      "Беленджер"
+    ],
+    "type": "city",
+    "coords": [
+      46.88,
+      43.08
+    ],
+    "start": 550,
+    "end": 740,
+    "approx": true,
+    "note": "Город и объединение середины VI — 20-х гг. VIII в.; район Верхнего Чирюрта (т. I, с. 171)."
+  },
+  {
+    "id": "kumukh",
+    "name": "Кумух",
+    "altNames": [
+      "Гумик"
+    ],
+    "type": "settlement",
+    "coords": [
+      47.12,
+      42.17
+    ],
+    "start": 700,
+    "end": null,
+    "approx": true,
+    "note": "Упоминается в связи с походом Марвана 738–739 гг. (т. I, с. 180)."
+  },
+  {
+    "id": "richa",
+    "name": "Рича",
+    "type": "settlement",
+    "coords": [
+      47.47,
+      41.93
+    ],
+    "start": 1100,
+    "end": null,
+    "approx": true,
+    "note": "Мечеть XI–XII вв.; оборона от монголов в 1239 г. (т. I, с. 226–228)."
+  }
 ]

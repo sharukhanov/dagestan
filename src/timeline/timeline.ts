@@ -8,7 +8,7 @@ import { getState, setState, subscribe } from '../state';
 
 interface Segment { start: number; end: number; x0: number; x1: number; color: string; title: string; id: string | null }
 
-const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
+const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
 
 export interface TimelineOptions {
   /** Сколько лет вокруг бегунка считается «текущим моментом» для показа событий. */
@@ -40,19 +40,30 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
 
   // --- Геометрия ---
 
+  // Отрезки шкалы — подпериоды эпох (или эпоха целиком). Ширина отрезка растёт
+  // логарифмически от длительности: тысячелетия каменного века не съедают всю шкалу,
+  // а четыре года войны остаются видны.
   function buildSegments() {
     const unit = Math.max(9, Math.min(16, window.innerWidth / 70)) * zoom;
     const segs: Segment[] = [];
     let x = 0;
+    const add = (start: number, end: number, color: string, title: string, id: string | null) => {
+      if (end <= start) return;
+      const w = (4 + 5 * Math.log(1 + (end - start) / 8)) * unit;
+      segs.push({ start, end, x0: x, x1: x + w, color, title, id });
+      x += w;
+    };
     epochs.forEach((ep, i) => {
-      const add = (start: number, end: number, color: string, title: string, id: string | null) => {
-        const w = (6 + Math.sqrt(end - start)) * unit;
-        segs.push({ start, end, x0: x, x1: x + w, color, title, id });
-        x += w;
-      };
       const prev = epochs[i - 1];
       if (prev && prev.end < ep.start) add(prev.end, ep.start, '#555', '', null);
-      add(ep.start, ep.end, ep.color, ep.title, ep.id);
+      const subs = ep.subperiods.slice().sort((a, b) => a.start - b.start);
+      let cur = ep.start;
+      for (const sp of subs) {
+        if (sp.start > cur) add(cur, sp.start, ep.color, '', ep.id);
+        add(Math.max(sp.start, cur), sp.end, ep.color, sp.title, ep.id);
+        cur = Math.max(cur, sp.end);
+      }
+      if (cur < ep.end) add(cur, ep.end, ep.color, '', ep.id);
     });
     segments = segs;
     width = x;
@@ -85,14 +96,21 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
   function render() {
     buildSegments();
     const parts: string[] = [];
+    for (const ep of epochs) {
+      const x0 = yearToX(ep.start);
+      const x1 = yearToX(ep.end);
+      parts.push(
+        `<button type="button" class="tl-band" data-epoch="${ep.id}" style="left:${x0}px;width:${x1 - x0}px;--c:${ep.color}">` +
+        `<span>${ep.title}</span></button>`,
+      );
+    }
     for (const s of segments) {
       const w = s.x1 - s.x0;
-      parts.push(
-        `<button type="button" class="tl-band" ${s.id ? `data-epoch="${s.id}"` : 'disabled'} style="left:${s.x0}px;width:${w}px;--c:${s.color}">` +
-        `<span>${s.title}</span></button>`,
-      );
+      if (s.title) {
+        parts.push(`<div class="tl-sub" style="left:${s.x0}px;width:${w}px;--c:${s.color}" title="${s.title.replace(/"/g, '&quot;')}"><span>${s.title}</span></div>`);
+      }
       const ppy = w / (s.end - s.start);
-      const step = TICK_STEPS.find((st) => st * ppy >= 56) ?? 1000;
+      const step = TICK_STEPS.find((st) => st * ppy >= 56) ?? TICK_STEPS[TICK_STEPS.length - 1];
       const first = Math.ceil(s.start / step) * step;
       for (let y = first; y < s.end; y += step) {
         if (y === 0) continue;
@@ -113,9 +131,8 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     track.innerHTML = parts.join('');
     track.style.width = `${width}px`;
 
-    overview.innerHTML = segments
-      .filter((s) => s.id)
-      .map((s) => `<button type="button" data-epoch="${s.id}" style="flex:${s.x1 - s.x0};--c:${s.color}" title="${s.title}"><span>${s.title}</span></button>`)
+    overview.innerHTML = epochs
+      .map((ep) => `<button type="button" data-epoch="${ep.id}" style="flex:${yearToX(ep.end) - yearToX(ep.start)};--c:${ep.color}" title="${ep.title}"><span>${ep.title}</span></button>`)
       .join('') + '<div class="tl-ov-cursor"></div>';
   }
 

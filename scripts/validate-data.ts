@@ -90,6 +90,30 @@ for (const ev of events) {
   if (sentences > 6) warnings.push(`${where}: в описании ${sentences} предложений — лучше 3–5`);
 }
 
+// Цитаты evidence сверяются с текстом источника, если он скачан в research/txt/
+// (в CI папки research/ нет — тогда проверка пропускается).
+// Сравниваем без пробелов, дефисов и переносов: pdftotext по-разному склеивает строки.
+const norm = (t: string) =>
+  t.replace(/[«»“”"„]/g, '"').replace(/[\u00ad\-–—−\s]/g, '').replace(/ё/g, 'е').toLowerCase();
+const textCache = new Map<string, string | null>();
+function sourceText(file: string): string | null {
+  if (!textCache.has(file)) {
+    const path = join(root, 'research', 'txt', `${file}.txt`);
+    textCache.set(file, existsSync(path) ? norm(readFileSync(path, 'utf8')) : null);
+  }
+  return textCache.get(file)!;
+}
+let quotesChecked = 0;
+for (const ev of events) {
+  for (const e of ev.evidence) {
+    const file = sourceById.get(e.source)?.researchFile;
+    const text = file ? sourceText(file) : null;
+    if (!text) continue;
+    quotesChecked++;
+    if (!text.includes(norm(e.quote))) errors.push(`events.json → ${ev.id}: цитата не найдена в тексте источника "${e.source}": «${e.quote.slice(0, 80)}…»`);
+  }
+}
+
 for (const p of places) {
   if (p.end !== null && p.end < p.start) errors.push(`places.json → ${p.id}: конец раньше начала`);
 }
@@ -104,4 +128,5 @@ if (errors.length) {
   process.exit(1);
 }
 const verified = events.filter((e) => e.verified).length;
+if (quotesChecked) console.log(`✔ Цитат сверено с текстами источников: ${quotesChecked}`);
 console.log(`✔ Данные в порядке: эпох ${epochs.length}, событий ${events.length} (проверено ${verified}), мест ${places.length}, зон ${polities.length}, источников ${sources.length}.`);
