@@ -24,10 +24,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Сайт живёт по адресу https://<user>.github.io/<repo>/ — отсюда base path.
       - run: npm run build
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 
-// На GitHub Pages сайт живёт по адресу https://<user>.github.io/<repo>/,
-// поэтому base берётся из переменной окружения, которую задаёт workflow.
+// Относительные пути: один и тот же билд работает и на https://<user>.github.io/<repo>/,
+// и на собственном домене в корне (https://sharukhanov.com/).
 export default defineConfig({
-  base: process.env.BASE_PATH ?? '/',
+  base: './',
   worker: { format: 'es' },
   build: { chunkSizeWarningLimit: 1500 },
 });

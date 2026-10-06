@@ -3,7 +3,8 @@
 import type { StyleSpecification, LayerSpecification, ExpressionSpecification } from 'maplibre-gl';
 import type { Theme } from '../state';
 
-const base = import.meta.env.BASE_URL;
+// Абсолютный адрес папки сайта: MapLibre грузит GeoJSON в воркере, где относительные пути не работают.
+const base = new URL(import.meta.env.BASE_URL, window.location.href).href;
 
 export const ATTRIBUTION =
   'Рельеф: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">Mapzen Terrain Tiles</a> · ' +
