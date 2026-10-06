@@ -30,9 +30,11 @@ npm run preview    # посмотреть собранную версию
 Пути в сборке относительные, поэтому один и тот же билд работает и на `https://sharukhanov.github.io/dagestan/`,
 и на собственном домене.
 
-### Свой домен (sharukhanov.com)
+### Свой домен
 
-1. У регистратора домена добавить DNS-записи:
-   - `A` для `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `CNAME` для `www` → `sharukhanov.github.io`
-2. В GitHub: Settings → Pages → Custom domain → `sharukhanov.com` → Save; после проверки DNS включить **Enforce HTTPS**.
+Корень `sharukhanov.com` занят личным сайтом, поэтому история живёт на поддомене **dagestan.sharukhanov.com**:
+
+1. В DNS домена (панель SpaceWeb) добавить запись `CNAME`: имя `dagestan` → значение `sharukhanov.github.io.`
+2. Когда запись заработает (`nslookup dagestan.sharukhanov.com` показывает адреса GitHub), положить в корень репозитория
+   файл `CNAME` с одной строкой `dagestan.sharukhanov.com` и запушить в `main` — workflow сам добавит его в публикацию.
+3. В Settings → Pages включить **Enforce HTTPS** (галочка появится через несколько минут после шага 2).
