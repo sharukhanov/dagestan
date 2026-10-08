@@ -19,9 +19,20 @@ export function getState(): AppState {
   return state;
 }
 
+let eventYear: (id: string) => number | undefined = () => undefined;
+/** Как узнать год события: при выборе события год меняется сразу, в том же обновлении. */
+export function setEventYearResolver(fn: (id: string) => number | undefined) {
+  eventYear = fn;
+}
+
 export function setState(patch: Partial<AppState>) {
   const prev = state;
   const next = { ...state, ...patch };
+  // Новое событие без явного года — сразу переносимся в его год, чтобы карта
+  // не показывала долю секунды старое время, пока шкала едет к событию.
+  if (patch.eventId && patch.eventId !== prev.eventId && patch.year === undefined) {
+    next.year = eventYear(patch.eventId) ?? next.year;
+  }
   if (next.year === prev.year && next.eventId === prev.eventId && next.theme === prev.theme) return;
   state = next;
   for (const l of listeners) l(state, prev);
@@ -49,7 +60,11 @@ export function followHash() {
   window.addEventListener('hashchange', (e) => {
     // Адрес берём из самого события: отложенная запись могла уже перезаписать location.hash.
     clearTimeout(hashTimer);
-    setState(parseHash(new URL(e.newURL).hash, state));
+    const hash = new URL(e.newURL).hash;
+    const patch: Partial<AppState> = parseHash(hash, state);
+    // В ссылке только событие — год возьмём из события.
+    if (!new URLSearchParams(hash.replace(/^#/, '')).has('y')) delete patch.year;
+    setState(patch);
   });
 }
 
@@ -68,6 +83,7 @@ export function readHash(defaults: AppState): AppState {
     eventId: p.get('e') || defaults.eventId,
     theme,
   };
+  if (state.eventId && !p.has('y')) state.year = eventYear(state.eventId) ?? state.year;
   return state;
 }
 

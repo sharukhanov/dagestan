@@ -47,41 +47,70 @@ export const PALETTES: Record<Theme, Palette> = {
   },
 };
 
+/** Прозрачность зоны: base — «полная» прозрачность слоя; kind — заливка или контур. */
+export type PolityOpacity = (base: number, kind: 'fill' | 'line') => ExpressionSpecification | number;
+
+/** Слои зон, у которых анимируется прозрачность: при смене года зоны проявляются и гаснут. */
+export const POLITY_PAINT: Record<Theme, { id: string; prop: 'fill-opacity' | 'line-opacity'; base: number; kind: 'fill' | 'line' }[]> = {
+  old: [
+    { id: 'polity-fill', prop: 'fill-opacity', base: 0.16, kind: 'fill' },
+    { id: 'polity-hatch', prop: 'fill-opacity', base: 0.55, kind: 'fill' },
+    { id: 'polity-line', prop: 'line-opacity', base: 0.85, kind: 'line' },
+  ],
+  modern: [
+    { id: 'polity-fill', prop: 'fill-opacity', base: 0.24, kind: 'fill' },
+    { id: 'polity-line-glow', prop: 'line-opacity', base: 0.18, kind: 'line' },
+    { id: 'polity-line', prop: 'line-opacity', base: 0.9, kind: 'line' },
+  ],
+};
+
 /** Слой зон влияния: в «старой» теме — штриховка, в «современной» — полупрозрачная заливка. */
-export function polityLayers(theme: Theme, filter: ExpressionSpecification): LayerSpecification[] {
+export function polityLayers(theme: Theme, op: PolityOpacity): LayerSpecification[] {
   if (theme === 'old') {
     return [
       {
-        id: 'polity-fill', type: 'fill', source: 'polities', filter,
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.16 },
+        id: 'polity-fill', type: 'fill', source: 'polities',
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': op(0.16, 'fill') },
       },
       {
-        id: 'polity-hatch', type: 'fill', source: 'polities', filter,
-        paint: { 'fill-pattern': ['concat', 'hatch-', ['get', 'color']], 'fill-opacity': 0.55 },
+        id: 'polity-hatch', type: 'fill', source: 'polities',
+        paint: { 'fill-pattern': ['concat', 'hatch-', ['get', 'color']], 'fill-opacity': op(0.55, 'fill') },
       },
       {
-        id: 'polity-line', type: 'line', source: 'polities', filter,
-        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': 0.85, 'line-dasharray': [3, 1.5] },
+        id: 'polity-line', type: 'line', source: 'polities',
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': op(0.85, 'line'), 'line-dasharray': [3, 1.5] },
       },
     ];
   }
   return [
     {
-      id: 'polity-fill', type: 'fill', source: 'polities', filter,
-      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.24 },
+      id: 'polity-fill', type: 'fill', source: 'polities',
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': op(0.24, 'fill') },
     },
     {
-      id: 'polity-line-glow', type: 'line', source: 'polities', filter,
-      paint: { 'line-color': ['get', 'color'], 'line-width': 6, 'line-opacity': 0.18, 'line-blur': 4 },
+      id: 'polity-line-glow', type: 'line', source: 'polities',
+      paint: { 'line-color': ['get', 'color'], 'line-width': 6, 'line-opacity': op(0.18, 'line'), 'line-blur': 4 },
     },
     {
-      id: 'polity-line', type: 'line', source: 'polities', filter,
-      paint: { 'line-color': ['get', 'color'], 'line-width': 1.4, 'line-opacity': 0.9 },
+      id: 'polity-line', type: 'line', source: 'polities',
+      paint: { 'line-color': ['get', 'color'], 'line-width': 1.4, 'line-opacity': op(0.9, 'line') },
     },
   ];
 }
 
-export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection, filter: ExpressionSpecification): StyleSpecification {
+/** Контуры зон как линии: по ним «прорисовывается» граница появляющейся зоны. */
+function outlines(fc: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: fc.features.map((f) => {
+      const g = f.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
+      const rings = g.type === 'Polygon' ? g.coordinates : g.coordinates.flat();
+      return { type: 'Feature', properties: f.properties, geometry: { type: 'MultiLineString', coordinates: rings } };
+    }),
+  };
+}
+
+export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection, op: PolityOpacity): StyleSpecification {
   const p = PALETTES[theme];
   // На «старой карте» современных водохранилищ нет.
   const lakeFilter: ExpressionSpecification = theme === 'old'
@@ -105,6 +134,8 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
 
   return {
     version: 8,
+    // Прозрачность зон анимируем сами, покадрово — встроенные плавные переходы только мешают.
+    transition: { duration: 0, delay: 0 },
     sources: {
       dem: {
         type: 'raster-dem',
@@ -121,6 +152,7 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
       coastline: { type: 'geojson', data: `${base}basemap/coastline.geojson` },
       dagestan: { type: 'geojson', data: `${base}basemap/dagestan.geojson` },
       polities: { type: 'geojson', data: politiesData },
+      'polity-outline': { type: 'geojson', data: outlines(politiesData), lineMetrics: true },
     },
     layers: [
       { id: 'land', type: 'background', paint: { 'background-color': p.land } },
@@ -134,7 +166,7 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
           'hillshade-illumination-direction': 315,
         },
       },
-      ...polityLayers(theme, filter),
+      ...polityLayers(theme, op),
       { id: 'ocean', type: 'fill', source: 'ocean', paint: { 'fill-color': p.water } },
       ...waterLining,
       { id: 'lakes', type: 'fill', source: 'lakes', filter: lakeFilter, paint: { 'fill-color': p.water } },

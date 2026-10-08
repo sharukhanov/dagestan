@@ -526,20 +526,34 @@ a { color: var(--accent); }
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel-solid);
+  height: 32px;
+  padding: 0 10px 0 4px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 13%, var(--panel-solid));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
   cursor: pointer;
   font-size: 12.5px;
+  font-weight: 600;
   color: var(--text);
+  transition: background 0.15s, transform 0.1s;
 }
-.tl-step.next { justify-content: flex-end; }
-.tl-step .arr { font-size: 20px; line-height: 1; color: var(--accent); font-weight: 700; }
+.tl-step.next { justify-content: flex-end; padding: 0 4px 0 10px; }
+/* Стрелка — залитый кружок цвета акцента: сразу видно, что это кнопка */
+.tl-step .arr {
+  flex: none;
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--panel-solid);
+  font-size: 18px; line-height: 1; font-weight: 700;
+  padding-bottom: 2px;
+}
 .tl-step .txt { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.tl-step:hover:not(:disabled) { border-color: var(--accent); }
-.tl-step:disabled { opacity: 0.35; cursor: default; }
+.tl-step:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 24%, var(--panel-solid)); }
+.tl-step:active:not(:disabled) { transform: scale(0.98); }
+.tl-step:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
 .tl-zoom { display: flex; gap: 4px; flex: none; }
 .tl-zoom button {
   width: 30px; height: 30px;
@@ -746,7 +760,7 @@ a { color: var(--accent); }
   .basemap-switch button { padding: 5px 10px; font-size: 12px; }
   .maplibregl-ctrl-top-right { display: none; }
   .tl-zoom { display: none; }
-  .tl-step { font-size: 12px; padding: 0 8px; }
+  .tl-step { font-size: 12px; }
   .tl-lane-label { display: none; }
   .legend { left: 8px; right: auto; width: min(290px, calc(100vw - 16px)); bottom: calc(var(--tl-h) + 46px); max-height: 45vh; }
   .event-marker span { max-width: 150px; font-size: 12px; }
@@ -786,3 +800,7 @@ a { color: var(--accent); }
 }
 
 .collide { visibility: hidden; }
+
+/* Подписи государств проявляются и гаснут вместе с зонами */
+.map-label.polity { transition: opacity 0.45s ease 0.25s, visibility 0s linear 0s; }
+.map-label.polity.off { opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }

@@ -1,10 +1,10 @@
 // Карта: подложка, зоны влияния, города и крепости, точки событий.
 import * as maplibregl from 'maplibre-gl';
-import type { ExpressionSpecification, Map as MlMap } from 'maplibre-gl';
+import type { ExpressionSpecification, LineLayerSpecification, Map as MlMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre 6 грузит воркер отдельным модулем — отдаём его через Vite, иначе на сборке он теряется.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import { buildStyle, makeHatch } from './basemaps';
+import { buildStyle, makeHatch, POLITY_PAINT, type PolityOpacity } from './basemaps';
 import { events, places, polities, eventSpan } from '../data';
 import type { HistEvent, Place, PolityProps } from '../schema';
 import { getState, setState, subscribe, type Theme } from '../state';
@@ -27,8 +27,77 @@ function placeName(p: Place, year: number): string {
 }
 const polityLabels: { el: HTMLElement; props: PolityProps }[] = [];
 
-function polityFilter(year: number): ExpressionSpecification {
-  return ['all', ['<=', ['get', 'start'], year], ['>=', ['get', 'end'], year]];
+// --- Зоны влияния: плавное появление и исчезновение ---
+// У каждой зоны свой номер _k. Новая зона сначала «прорисовывается» контуром,
+// затем проявляется заливка; ушедшая — плавно гаснет.
+const N = polities.features.length;
+polities.features.forEach((f, k) => { (f.properties as PolityProps & { _k: number })._k = k; });
+const fade = new Float32Array(N);   // 0…1 — насколько зона проявлена
+const draw = new Float32Array(N).fill(1); // 0…1 — какая доля контура прорисована
+const target = new Uint8Array(N);
+const DRAW_MS = 900, FADE_IN_MS = 600, FADE_OUT_MS = 350;
+let animFrame = 0;
+let lastT = 0;
+
+const opacity: PolityOpacity = (base, kind) => {
+  const pairs: (number | ExpressionSpecification)[] = [];
+  for (let k = 0; k < N; k++) {
+    const v = kind === 'line' && draw[k] < 1 ? 0 : fade[k];
+    if (v > 0) pairs.push(k, +(base * v).toFixed(3));
+  }
+  return pairs.length ? (['match', ['get', '_k'], ...pairs, 0] as unknown as ExpressionSpecification) : 0;
+};
+
+function setPolityTargets(year: number) {
+  for (let k = 0; k < N; k++) {
+    const p = polities.features[k].properties;
+    const on = year >= p.start && year <= p.end ? 1 : 0;
+    if (on === target[k]) continue;
+    target[k] = on;
+    if (on && fade[k] === 0) draw[k] = 0; // появляется с нуля — рисуем контур
+    if (!on) draw[k] = 1;                 // уходит — дорисовку прекращаем
+  }
+  if (!animFrame) { lastT = performance.now(); animFrame = requestAnimationFrame(stepPolities); }
+}
+
+function stepPolities(t: number) {
+  const dt = Math.min(64, t - lastT);
+  lastT = t;
+  let busy = false;
+  for (let k = 0; k < N; k++) {
+    if (target[k]) {
+      if (draw[k] < 1) draw[k] = Math.min(1, draw[k] + dt / DRAW_MS);
+      if (draw[k] > 0.35 && fade[k] < 1) fade[k] = Math.min(1, fade[k] + dt / FADE_IN_MS);
+      if (draw[k] < 1 || fade[k] < 1) busy = true;
+    } else if (fade[k] > 0) {
+      fade[k] = Math.max(0, fade[k] - dt / FADE_OUT_MS);
+      busy = true;
+    }
+  }
+  paintPolities();
+  animFrame = busy ? requestAnimationFrame(stepPolities) : 0;
+}
+
+function paintPolities() {
+  if (!map?.getLayer('polity-fill')) return;
+  for (const l of POLITY_PAINT[getState().theme]) {
+    if (map.getLayer(l.id)) map.setPaintProperty(l.id, l.prop, opacity(l.base, l.kind));
+  }
+  for (let k = 0; k < N; k++) {
+    const id = `polity-draw-${k}`;
+    const drawing = target[k] === 1 && draw[k] < 1;
+    if (!drawing) { if (map.getLayer(id)) map.removeLayer(id); continue; }
+    const color = polities.features[k].properties.color;
+    const gradient: ExpressionSpecification = ['step', ['line-progress'], color, Math.max(0.001, draw[k]), 'rgba(0,0,0,0)'];
+    if (map.getLayer(id)) { map.setPaintProperty(id, 'line-gradient', gradient); continue; }
+    const layer: LineLayerSpecification = {
+      id, type: 'line', source: 'polity-outline',
+      filter: ['==', ['get', '_k'], k],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-width': 2.4, 'line-gradient': gradient },
+    };
+    map.addLayer(layer, 'ocean');
+  }
 }
 
 function labelPoint(geom: GeoJSON.Polygon | GeoJSON.MultiPolygon): [number, number] {
@@ -49,11 +118,11 @@ function labelPoint(geom: GeoJSON.Polygon | GeoJSON.MultiPolygon): [number, numb
 
 export function initMap(container: HTMLElement): MlMap {
   maplibregl.setWorkerUrl(workerUrl);
-  const { theme, year } = getState();
+  const { theme } = getState();
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
   map = new maplibregl.Map({
     container,
-    style: buildStyle(theme, polities, polityFilter(year)),
+    style: buildStyle(theme, polities, opacity),
     center: [46.9, 42.6],
     zoom: isPhone ? 5.3 : 6.1,
     minZoom: 4.3,
@@ -119,6 +188,7 @@ export function initMap(container: HTMLElement): MlMap {
     if (getState().eventId) setState({ eventId: null });
   });
 
+  map.on('load', paintPolities);
   update(getState().year);
   if (getState().eventId) focusEvent(getState().eventId!, false);
   map.on('move', scheduleDeclutter);
@@ -138,16 +208,11 @@ export function setEventWindow(years: number) {
 
 function update(year: number) {
   const { eventId } = getState();
-  if (map.getLayer('polity-fill')) {
-    const f = polityFilter(year);
-    for (const id of ['polity-fill', 'polity-hatch', 'polity-line', 'polity-line-glow']) {
-      if (map.getLayer(id)) map.setFilter(id, f);
-    }
-  }
+  setPolityTargets(year);
   const visible = new Map<string, PolityProps>();
   for (const { el, props } of polityLabels) {
     const on = year >= props.start && year <= props.end;
-    el.classList.toggle('hidden', !on);
+    el.classList.toggle('off', !on);
     if (on && !visible.has(props.polityId)) visible.set(props.polityId, props);
   }
   renderLegend(year, [...visible.values()]);
@@ -261,7 +326,9 @@ function renderLegend(year: number, items: PolityProps[]) {
 }
 
 function applyTheme(theme: Theme) {
-  map.setStyle(buildStyle(theme, polities, polityFilter(getState().year)), { diff: false });
+  // При смене подложки дорисовку контуров завершаем сразу.
+  draw.fill(1);
+  map.setStyle(buildStyle(theme, polities, opacity), { diff: false });
   document.documentElement.dataset.theme = theme;
 }
 

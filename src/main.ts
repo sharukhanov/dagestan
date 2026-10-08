@@ -4,8 +4,9 @@ import { initTimeline } from './timeline/timeline';
 import { initCard } from './card/card';
 import { initSourcesPanel } from './sources/panel';
 import { epochAt, events } from './data';
-import { followHash, getState, readHash, setState, subscribe } from './state';
+import { followHash, getState, readHash, setEventYearResolver, setState, subscribe } from './state';
 
+setEventYearResolver((id) => events.find((e) => e.id === id)?.start.year);
 const first = events.slice().sort((a, b) => a.start.year - b.start.year)[0];
 readHash({ year: first?.start.year ?? 550, eventId: null, theme: 'old' });
 document.documentElement.dataset.theme = getState().theme;
