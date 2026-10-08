@@ -137,13 +137,13 @@ function update(year: number) {
       if (map.getLayer(id)) map.setFilter(id, f);
     }
   }
-  let anyPolity = false;
+  const visible = new Map<string, PolityProps>();
   for (const { el, props } of polityLabels) {
     const on = year >= props.start && year <= props.end;
     el.classList.toggle('hidden', !on);
-    anyPolity ||= on;
+    if (on && !visible.has(props.polityId)) visible.set(props.polityId, props);
   }
-  document.getElementById('borders-note')!.hidden = !anyPolity;
+  renderLegend(year, [...visible.values()]);
 
   for (const { el, start, end } of placeMarkers) {
     el.classList.toggle('hidden', !(year >= start && (end === null || year <= end)));
@@ -198,6 +198,41 @@ function declutter() {
     if (overlaps(r)) span.classList.add('collide');
     else taken.push(r);
   }
+}
+
+// --- Легенда: что сейчас нарисовано на карте и почему ---
+
+const yearText = (y: number) => (y < 0 ? `${-y} г. до н. э.` : `${y} г.`);
+let legendOpen = !window.matchMedia('(max-width: 720px)').matches;
+let lastLegend = '';
+
+function renderLegend(year: number, items: PolityProps[]) {
+  const el = document.getElementById('legend')!;
+  const key = `${year}|${items.map((p) => p.polityId).join(',')}|${legendOpen}`;
+  if (key === lastLegend) return;
+  lastLegend = key;
+  const span = (p: PolityProps) => `${yearText(p.start).replace(' г.', '')}–${yearText(p.end)}`;
+  const rows = items.length
+    ? items.map((p) => `<li title="${(p.note ?? '').replace(/"/g, '&quot;')}"><i style="--c:${p.color}"></i><span>${p.name}<small>${span(p)}</small></span></li>`).join('')
+    : `<li class="empty">Зоны влияния для этого времени ещё не нанесены — появятся по мере наполнения эпох.</li>`;
+  el.classList.toggle('collapsed', !legendOpen);
+  el.innerHTML = `
+    <button type="button" class="lg-head" aria-expanded="${legendOpen}">
+      <b>На карте: ${yearText(year)}</b><span class="lg-count">${items.length || ''}</span><span class="lg-chev">${legendOpen ? '▾' : '▸'}</span>
+    </button>
+    <div class="lg-body">
+      <ul>${rows}</ul>
+      <p class="lg-outline"><i></i>Граница современного Дагестана — для ориентира</p>
+      <details class="lg-more"><summary>Как читать карту</summary>
+      <p class="lg-note">Зоны показывают, кто контролировал территорию в выбранный год, поэтому при движении шкалы они сменяют друг друга. Границы примерные; подробности — при наведении на название.</p>
+      <p class="lg-note">Берега и реки — современные. Уровень Каспия менялся: в геологическом прошлом (четвертичный период) море не раз заливало почти всю приморскую равнину; стены Дербента в VI в. уходили в море примерно на 150 м.</p>
+      </details>
+    </div>`;
+  el.querySelector('.lg-head')!.addEventListener('click', () => {
+    legendOpen = !legendOpen;
+    lastLegend = '';
+    renderLegend(year, items);
+  });
 }
 
 function applyTheme(theme: Theme) {

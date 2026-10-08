@@ -1,12 +1,16 @@
 // Временная шкала: перетаскивается мышью и пальцем, с инерцией,
-// цветными полосами эпох и обзорной полоской для быстрого перехода.
+// цветными полосами эпох, дорожкой событий и стрелками «предыдущее / следующее».
 //
-// Масштаб неравномерный: каждая эпоха получает ширину ~ √длительности,
-// поэтому тысяча лет древности и четыре года революции обе остаются читаемыми.
-import { epochs, events, eventSpan, epochAt, yearLabel, centuryOf } from '../data';
+// Масштаб неравномерный: ширина отрезка растёт логарифмически от длительности,
+// поэтому тысячелетия древности и четыре года революции обе остаются читаемыми.
+import { epochs, events, eventSpan, yearLabel, centuryOf } from '../data';
+import type { HistEvent } from '../schema';
 import { getState, setState, subscribe } from '../state';
 
 interface Segment { start: number; end: number; x0: number; x1: number; color: string; title: string; id: string | null }
+
+const byDate = (e: HistEvent) => e.start.year * 400 + (e.start.month ?? 0) * 32 + (e.start.day ?? 0);
+const sorted = events.slice().sort((a, b) => byDate(a) - byDate(b));
 
 const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
 
@@ -20,16 +24,21 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     <div class="tl-viewport" tabindex="0" role="slider" aria-label="Год">
       <div class="tl-track"></div>
     </div>
+    <span class="tl-lane-label" aria-hidden="true">события</span>
     <div class="tl-needle" aria-hidden="true"><div class="tl-bubble"><b></b><small></small></div></div>
-    <div class="tl-overview" aria-label="Эпохи — быстрый переход"></div>
-    <div class="tl-zoom">
-      <button type="button" data-z="-1" aria-label="Уменьшить масштаб шкалы">−</button>
-      <button type="button" data-z="1" aria-label="Увеличить масштаб шкалы">+</button>
+    <div class="tl-nav">
+      <button type="button" class="tl-step prev" aria-label="Предыдущее событие"><span class="arr">‹</span><span class="txt"></span></button>
+      <div class="tl-zoom">
+        <button type="button" data-z="-1" aria-label="Уменьшить масштаб шкалы">−</button>
+        <button type="button" data-z="1" aria-label="Увеличить масштаб шкалы">+</button>
+      </div>
+      <button type="button" class="tl-step next" aria-label="Следующее событие"><span class="txt"></span><span class="arr">›</span></button>
     </div>`;
-  const overview = root.querySelector<HTMLElement>('.tl-overview')!;
   const viewport = root.querySelector<HTMLElement>('.tl-viewport')!;
   const track = root.querySelector<HTMLElement>('.tl-track')!;
   const bubbleYear = root.querySelector<HTMLElement>('.tl-bubble b')!;
+  const prevBtn = root.querySelector<HTMLButtonElement>('.tl-step.prev')!;
+  const nextBtn = root.querySelector<HTMLButtonElement>('.tl-step.next')!;
   const bubbleSub = root.querySelector<HTMLElement>('.tl-bubble small')!;
 
   let zoom = 1;
@@ -119,21 +128,23 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
         parts.push(`<div class="tl-tick${major ? ' major' : ''}" style="left:${x}px"><span>${yearLabel(y, true)}</span></div>`);
       }
     }
-    for (const ev of events) {
+    // Дорожка событий: точка в начале события, полоска на его длительность и подпись,
+    // которая занимает место до следующей точки.
+    const xs = sorted.map((ev) => yearToX(ev.start.year));
+    sorted.forEach((ev, i) => {
       const [a, b] = eventSpan(ev);
-      const x0 = yearToX(a);
+      const x0 = xs[i];
       const x1 = yearToX(b);
+      const room = (i + 1 < xs.length ? xs[i + 1] : x0 + 220) - x0 - 22;
+      const title = ev.title.replace(/"/g, '&quot;');
       parts.push(
-        `<button type="button" class="tl-event${ev.verified ? '' : ' unverified'}" data-event="${ev.id}" ` +
-        `style="left:${x0}px;width:${Math.max(0, x1 - x0)}px" title="${ev.title.replace(/"/g, '&quot;')}"></button>`,
+        (x1 - x0 > 3 ? `<div class="tl-span" style="left:${x0}px;width:${x1 - x0}px"></div>` : '') +
+        `<button type="button" class="tl-event${ev.verified ? '' : ' unverified'}" data-event="${ev.id}" style="left:${x0}px" title="${title} · ${yearLabel(a)}">` +
+        `<i></i>${room > 40 ? `<span style="max-width:${Math.min(room, 200)}px">${ev.title}</span>` : ''}</button>`,
       );
-    }
+    });
     track.innerHTML = parts.join('');
     track.style.width = `${width}px`;
-
-    overview.innerHTML = epochs
-      .map((ep) => `<button type="button" data-epoch="${ep.id}" style="flex:${yearToX(ep.end) - yearToX(ep.start)};--c:${ep.color}" title="${ep.title}"><span>${ep.title}</span></button>`)
-      .join('') + '<div class="tl-ov-cursor"></div>';
   }
 
   function paint() {
@@ -144,10 +155,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     bubbleSub.textContent = centuryOf(y);
     viewport.setAttribute('aria-valuenow', String(y));
     viewport.setAttribute('aria-valuetext', `${yearLabel(y)} год`);
-    const cur = overview.querySelector<HTMLElement>('.tl-ov-cursor');
-    if (cur) cur.style.left = `${(posX / width) * 100}%`;
-    const ep = epochAt(y);
-    for (const b of overview.querySelectorAll<HTMLElement>('button')) b.classList.toggle('active', b.dataset.epoch === ep?.id);
+    updateNav(y);
     opts.onWindowChange(Math.max(0.5, 36 / pxPerYearAt(posX)));
   }
 
@@ -235,10 +243,33 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     if (band) goToEpoch(band.dataset.epoch!);
   }, true);
 
-  overview.addEventListener('click', (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-epoch]');
-    if (b) goToEpoch(b.dataset.epoch!);
-  });
+  // --- Стрелки «предыдущее / следующее событие» ---
+
+  function neighbours(y: number): [HistEvent | undefined, HistEvent | undefined] {
+    const id = getState().eventId;
+    const i = id ? sorted.findIndex((e) => e.id === id) : -1;
+    if (i >= 0) return [sorted[i - 1], sorted[i + 1]];
+    return [
+      [...sorted].reverse().find((e) => e.start.year < y),
+      sorted.find((e) => e.start.year > y),
+    ];
+  }
+
+  function updateNav(y: number) {
+    const [p, n] = neighbours(y);
+    for (const [btn, ev] of [[prevBtn, p], [nextBtn, n]] as const) {
+      btn.disabled = !ev;
+      btn.dataset.event = ev?.id ?? '';
+      btn.querySelector('.txt')!.textContent = ev ? `${yearLabel(ev.start.year)} · ${ev.title}` : '';
+      btn.title = ev ? `${ev.title} (${yearLabel(ev.start.year)})` : '';
+    }
+  }
+
+  for (const btn of [prevBtn, nextBtn]) {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.event) goToEvent(btn.dataset.event);
+    });
+  }
 
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -256,6 +287,13 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     else if (e.key === 'PageUp') next = y - 100;
     else if (e.key === 'PageDown') next = y + 100;
     else if (e.key === 'Home') next = epochs[0].start;
+    else if (e.key === ']' || e.key === '[') {
+      const [p, n] = neighbours(y);
+      const ev = e.key === ']' ? n : p;
+      if (ev) goToEvent(ev.id);
+      e.preventDefault();
+      return;
+    }
     else if (e.key === 'End') next = epochs[epochs.length - 1].end;
     if (next === null) return;
     e.preventDefault();
@@ -283,7 +321,11 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
   }
 
   // Внешние изменения года (клик по связанному событию, ссылка) — плавно едем к нему.
+  const markSelected = (id: string | null) => {
+    for (const b of track.querySelectorAll<HTMLElement>('.tl-event')) b.classList.toggle('selected', b.dataset.event === id);
+  };
   subscribe((s, prev) => {
+    if (s.eventId !== prev.eventId) { updateNav(s.year); markSelected(s.eventId); }
     if (s.eventId && s.eventId !== prev.eventId) {
       const ev = events.find((e) => e.id === s.eventId);
       if (ev && roundYear(xToYear(posX)) !== ev.start.year) animateTo(yearToX(ev.start.year), 900);
@@ -300,4 +342,5 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
 
   render();
   setPos(yearToX(getState().year), false);
+  markSelected(getState().eventId);
 }

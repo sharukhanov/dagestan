@@ -9,7 +9,7 @@ M="$ROOT/node_modules/.bin/mapshaper"
 BBOX="33,35,58,50"
 mkdir -p "$OUT"
 cd "$TMP"
-for f in physical/ne_10m_ocean physical/ne_10m_lakes physical/ne_10m_rivers_lake_centerlines physical/ne_10m_coastline; do
+for f in physical/ne_10m_ocean physical/ne_10m_lakes physical/ne_10m_rivers_lake_centerlines physical/ne_10m_coastline cultural/ne_10m_admin_1_states_provinces; do
   curl -sSLO "https://naciscdn.org/naturalearth/10m/$f.zip"
   unzip -oq "$(basename "$f").zip"
 done
@@ -21,5 +21,7 @@ done
 # featurecla нужен, чтобы на «старой карте» скрыть современные водохранилища
 "$M" ne_10m_lakes.shp -clip bbox=$BBOX -simplify 40% keep-shapes -filter-fields name,featurecla -o "$OUT/lakes.geojson" format=geojson geojson-type=FeatureCollection rfc7946 precision=0.001
 "$M" ne_10m_rivers_lake_centerlines.shp -clip bbox=$BBOX -filter-fields name,scalerank,featurecla -o "$OUT/rivers.geojson" format=geojson geojson-type=FeatureCollection rfc7946 precision=0.001
+# Контур современного Дагестана — тонкая пунктирная линия-ориентир поверх исторических зон.
+"$M" ne_10m_admin_1_states_provinces.shp -filter 'iso_3166_2 == "RU-DA"' -filter-fields name -simplify 30% keep-shapes -o "$OUT/dagestan.geojson" format=geojson geojson-type=FeatureCollection rfc7946 precision=0.001
 rm -rf "$TMP"
 echo "Готово: $OUT"

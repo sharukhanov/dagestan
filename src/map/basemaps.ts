@@ -119,6 +119,7 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
       lakes: { type: 'geojson', data: `${base}basemap/lakes.geojson` },
       rivers: { type: 'geojson', data: `${base}basemap/rivers.geojson` },
       coastline: { type: 'geojson', data: `${base}basemap/coastline.geojson` },
+      dagestan: { type: 'geojson', data: `${base}basemap/dagestan.geojson` },
       polities: { type: 'geojson', data: politiesData },
     },
     layers: [
@@ -156,6 +157,17 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
           'line-color': p.coast,
           'line-width': theme === 'old' ? 1.3 : 0.9,
           'line-opacity': theme === 'old' ? 0.9 : 0.8,
+        },
+      },
+      {
+        // Ориентир: граница современной Республики Дагестан (всегда видна, не историческая).
+        id: 'dagestan-outline', type: 'line', source: 'dagestan',
+        layout: { 'line-join': 'round' },
+        paint: {
+          'line-color': theme === 'old' ? '#3a2a18' : '#e8dcc4',
+          'line-width': 1.4,
+          'line-opacity': theme === 'old' ? 0.55 : 0.45,
+          'line-dasharray': [2, 2],
         },
       },
     ],

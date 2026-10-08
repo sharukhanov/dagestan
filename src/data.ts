@@ -3,8 +3,9 @@ import epochsJson from '../data/epochs.json';
 import eventsJson from '../data/events.json';
 import placesJson from '../data/places.json';
 import sourcesJson from '../data/sources.json';
+import glossaryJson from '../data/glossary.json';
 import politiesRaw from '../data/polities.geojson?raw';
-import type { DateParts, Epoch, HistEvent, Place, PolityProps, Source } from './schema';
+import type { DateParts, Epoch, GlossaryItem, HistEvent, Place, PolityProps, Source } from './schema';
 import type { FeatureCollection, Polygon, MultiPolygon } from 'geojson';
 
 export const epochs = (epochsJson as unknown as Epoch[])
@@ -21,6 +22,9 @@ export const events = (eventsJson as unknown as HistEvent[]).map((e) => ({
 export const places = (placesJson as unknown as Place[]).map((p) => ({ ...p, altNames: p.altNames ?? [] }));
 export const sources = new Map((sourcesJson as Source[]).map((s) => [s.id, s]));
 export const polities = JSON.parse(politiesRaw) as FeatureCollection<Polygon | MultiPolygon, PolityProps>;
+
+export const glossary = glossaryJson as GlossaryItem[];
+export const glossaryById = new Map(glossary.map((g) => [g.id, g]));
 
 export const eventById = new Map(events.map((e) => [e.id, e]));
 

@@ -127,6 +127,19 @@ export const PolityPropsSchema = z.object({
   sources: z.array(SourceRefSchema).default([]),
 });
 
+export const GlossarySchema = z.object({
+  id,
+  /** Как термин называется в пояснении. */
+  term: z.string(),
+  /** Начала слов (регулярные выражения, без учёта регистра), по которым термин ищется в тексте. */
+  match: z.array(z.string()).min(1),
+  /** Пояснение: 1–2 предложения, кто это относительно современных народов. */
+  text: z.string(),
+  sources: z.array(SourceRefSchema).default([]),
+  evidence: z.array(EvidenceSchema).min(1),
+});
+
+export type GlossaryItem = z.infer<typeof GlossarySchema>;
 export type DateParts = z.infer<typeof DatePartsSchema>;
 export type HistEvent = z.infer<typeof EventSchema>;
 export type Epoch = z.infer<typeof EpochSchema>;

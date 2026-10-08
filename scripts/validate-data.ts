@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import {
-  EventSchema, EpochSchema, PlaceSchema, SourceSchema, PolityPropsSchema,
+  EventSchema, EpochSchema, PlaceSchema, SourceSchema, PolityPropsSchema, GlossarySchema,
 } from '../src/schema.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -50,6 +50,7 @@ const events = load('events.json', EventSchema);
 const places = load('places.json', PlaceSchema);
 const sources = load('sources.json', SourceSchema);
 const polities = load('polities.geojson', PolityPropsSchema);
+const glossary = load('glossary.json', GlossarySchema);
 
 dupes('epochs.json', epochs.map((e) => e.id));
 dupes('events.json', events.map((e) => e.id));
@@ -104,13 +105,23 @@ function sourceText(file: string): string | null {
   return textCache.get(file)!;
 }
 let quotesChecked = 0;
-for (const ev of events) {
+const withEvidence = [
+  ...events.map((e) => ({ where: `events.json → ${e.id}`, evidence: e.evidence })),
+  ...glossary.map((g) => ({ where: `glossary.json → ${g.id}`, evidence: g.evidence })),
+];
+for (const g of glossary) {
+  for (const e of g.evidence) if (!sourceById.has(e.source)) errors.push(`glossary.json → ${g.id}: неизвестный источник "${e.source}"`);
+  for (const m of g.match) {
+    try { new RegExp(m, 'iu'); } catch { errors.push(`glossary.json → ${g.id}: неверное выражение "${m}"`); }
+  }
+}
+for (const ev of withEvidence) {
   for (const e of ev.evidence) {
     const file = sourceById.get(e.source)?.researchFile;
     const text = file ? sourceText(file) : null;
     if (!text) continue;
     quotesChecked++;
-    if (!text.includes(norm(e.quote))) errors.push(`events.json → ${ev.id}: цитата не найдена в тексте источника "${e.source}": «${e.quote.slice(0, 80)}…»`);
+    if (!text.includes(norm(e.quote))) errors.push(`${ev.where}: цитата не найдена в тексте источника "${e.source}": «${e.quote.slice(0, 80)}…»`);
   }
 }
 
