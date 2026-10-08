@@ -145,24 +145,105 @@ a { color: var(--accent); }
   width: 100%;
   border: 0;
   background: none;
-  padding: 9px 12px;
+  padding: 10px 12px;
   cursor: pointer;
   text-align: left;
+  font-size: 13px;
 }
 .lg-head b { flex: 1; font-weight: 600; }
-.lg-count { font-size: 11px; color: var(--muted); }
-.lg-chev { color: var(--muted); }
+.lg-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+.lg-chev { color: var(--muted); width: 12px; text-align: center; }
 .legend.collapsed .lg-body { display: none; }
-.lg-body { padding: 0 12px 10px; }
-.legend ul { list-style: none; margin: 0 0 8px; padding: 0; }
-.legend li { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; cursor: help; }
-.legend li i { flex: none; width: 14px; height: 14px; margin-top: 2px; border-radius: 3px; background: color-mix(in srgb, var(--c) 45%, transparent); border: 2px solid var(--c); }
-.legend li small { display: block; color: var(--muted); font-size: 11.5px; }
-.legend li.empty { color: var(--muted); font-style: italic; cursor: default; }
-.lg-outline { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; color: var(--muted); }
-.lg-outline i { flex: none; width: 22px; border-top: 2px dashed var(--text); opacity: 0.6; }
-.lg-more summary { cursor: pointer; color: var(--accent); font-size: 12px; margin-top: 4px; }
-.lg-note { margin: 6px 0 0; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+.lg-body { padding: 0 12px 10px; border-top: 1px solid var(--line); }
+.lg-list { list-style: none; margin: 0; padding: 6px 0 0; }
+/* Каждая строка легенды — сетка «значок 22px + текст», чтобы всё стояло в одном столбце */
+.lg-row, .lg-more summary {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  column-gap: 8px;
+  align-items: start;
+  padding: 5px 0;
+  line-height: 1.3;
+}
+.lg-row { cursor: help; }
+.lg-row small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 1px; }
+.lg-row > i { justify-self: center; margin-top: 2px; }
+.lg-row > i.sw { width: 14px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--c) 45%, transparent); border: 2px solid var(--c); }
+.lg-row.lg-outline { cursor: default; color: var(--muted); }
+.lg-row.lg-outline > i { width: 20px; margin-top: 8px; border-top: 2px dashed var(--text); opacity: 0.6; }
+.lg-row.empty { color: var(--muted); font-style: italic; cursor: default; }
+.lg-more { margin-top: 2px; border-top: 1px dashed var(--line); }
+.lg-more summary { list-style: none; cursor: pointer; color: var(--accent); font-size: 12.5px; }
+.lg-more summary::-webkit-details-marker { display: none; }
+.lg-more summary > i {
+  justify-self: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  font: italic 700 11px/13px 'PT Serif', Georgia, serif;
+  text-align: center;
+}
+.lg-note { margin: 4px 0 0 30px; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+/* ===== Источники ===== */
+.brand { display: flex; flex-direction: column; align-items: flex-start; }
+.src-btn {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+.src-btn .n {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 11px;
+}
+.src-btn[aria-expanded='true'] { border-color: var(--accent); }
+.src-panel {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  bottom: calc(var(--tl-h) + 12px);
+  width: min(460px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-solid);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  z-index: 8;
+}
+.src-panel[hidden] { display: none; }
+.src-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 8px; border-bottom: 1px solid var(--line); }
+.src-head h2 { margin: 0; font: 700 21px/1.2 'PT Serif', Georgia, serif; }
+.src-close { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: none; font-size: 20px; cursor: pointer; }
+.src-scroll { overflow-y: auto; padding: 4px 18px 18px; overscroll-behavior: contain; }
+.src-lead { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.src-panel h3 { margin: 18px 0 6px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.src-panel ol { margin: 0; padding-left: 20px; }
+.src-panel li { margin-bottom: 12px; font-size: 13.5px; line-height: 1.4; }
+.src-author { color: var(--muted); font-size: 12.5px; }
+.src-title a { color: var(--text); text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.src-title span { color: var(--muted); }
+.src-note { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.src-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.src-tags span { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); }
 
 /* ===== Подписи на карте ===== */
 .map-label {
@@ -657,6 +738,7 @@ a { color: var(--accent); }
 @media (max-width: 720px) {
   .topbar { padding-right: 12px; flex-direction: column; gap: 8px; }
   .brand h1 { font-size: 19px; }
+  .src-panel { top: 0; left: 0; right: 0; bottom: 0; width: auto; border-radius: 0; }
   .basemap-switch button { padding: 5px 10px; font-size: 12px; }
   .maplibregl-ctrl-top-right { display: none; }
   .tl-zoom { display: none; }

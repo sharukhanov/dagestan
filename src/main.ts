@@ -2,6 +2,7 @@ import './styles/main.css';
 import { initMap, setEventWindow } from './map/map';
 import { initTimeline } from './timeline/timeline';
 import { initCard } from './card/card';
+import { initSourcesPanel } from './sources/panel';
 import { epochAt, events } from './data';
 import { getState, readHash, setState, subscribe } from './state';
 
@@ -12,6 +13,7 @@ document.documentElement.dataset.theme = getState().theme;
 initMap(document.getElementById('map')!);
 initTimeline(document.getElementById('timeline')!, { onWindowChange: setEventWindow });
 initCard(document.getElementById('card')!);
+initSourcesPanel(document.getElementById('src-btn')!);
 
 // Название текущей эпохи в шапке.
 const epochNow = document.getElementById('epoch-now')!;

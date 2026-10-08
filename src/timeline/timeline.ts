@@ -113,17 +113,23 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
         `<span>${ep.title}</span></button>`,
       );
     }
+    let lastTickX = -Infinity;
     for (const s of segments) {
       const w = s.x1 - s.x0;
       if (s.title) {
         parts.push(`<div class="tl-sub" style="left:${s.x0}px;width:${w}px;--c:${s.color}" title="${s.title.replace(/"/g, '&quot;')}"><span>${s.title}</span></div>`);
       }
       const ppy = w / (s.end - s.start);
-      const step = TICK_STEPS.find((st) => st * ppy >= 56) ?? TICK_STEPS[TICK_STEPS.length - 1];
+      // Шаг подбираем по ширине подписи: «2250 до н.э.» заметно длиннее, чем «1850».
+      const labelPx = (y: number) => yearLabel(y, true).length * 6.3 + 16;
+      const step = TICK_STEPS.find((st) => st * ppy >= Math.max(48, labelPx(Math.round(s.start / st) * st || st))) ?? TICK_STEPS[TICK_STEPS.length - 1];
       const first = Math.ceil(s.start / step) * step;
       for (let y = first; y < s.end; y += step) {
         if (y === 0) continue;
         const x = s.x0 + (y - s.start) * ppy;
+        // На стыке отрезков метки соседних шагов могут встать вплотную — пропускаем.
+        if (x - lastTickX < labelPx(y)) continue;
+        lastTickX = x;
         const major = y === first || (y / step) % 2 === 0;
         parts.push(`<div class="tl-tick${major ? ' major' : ''}" style="left:${x}px"><span>${yearLabel(y, true)}</span></div>`);
       }
@@ -159,20 +165,30 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     opts.onWindowChange(Math.max(0.5, 36 / pxPerYearAt(posX)));
   }
 
-  function setPos(x: number, commit = true) {
+  function setPos(x: number, commit = true, user = false) {
     posX = Math.min(Math.max(x, 0), width);
     paint();
-    if (commit) setState({ year: roundYear(xToYear(posX)) });
+    if (!commit) return;
+    const year = roundYear(xToYear(posX));
+    // Пользователь сам увёл шкалу от открытого события — закрываем его карточку.
+    const id = getState().eventId;
+    const ev = user && id ? events.find((e) => e.id === id) : undefined;
+    if (ev) {
+      const [a, b] = eventSpan(ev);
+      const w = Math.max(0.5, 36 / pxPerYearAt(posX));
+      if (year < a - w || year > b + w) { setState({ year, eventId: null }); return; }
+    }
+    setState({ year });
   }
 
-  function animateTo(x: number, duration = 700) {
+  function animateTo(x: number, duration = 700, user = false) {
     cancelAnimationFrame(anim);
     const from = posX;
     const t0 = performance.now();
     const step = (t: number) => {
       const k = Math.min(1, (t - t0) / duration);
       const e = 1 - Math.pow(1 - k, 3);
-      setPos(from + (x - from) * e, k === 1);
+      setPos(from + (x - from) * e, k === 1, user);
       if (k < 1) anim = requestAnimationFrame(step);
     };
     anim = requestAnimationFrame(step);
@@ -212,7 +228,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     velocity = 0.8 * velocity + 0.2 * ((e.clientX - lastX) / dt);
     lastX = e.clientX;
     lastT = now;
-    setPos(startPos - dx);
+    setPos(startPos - dx, true, true);
   });
   const end = (e: PointerEvent) => {
     if (!dragging) return;
@@ -224,7 +240,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
       let v = velocity * 16;
       const glide = () => {
         v *= 0.93;
-        setPos(posX - v);
+        setPos(posX - v, true, true);
         if (Math.abs(v) > 0.3 && posX > 0 && posX < width) anim = requestAnimationFrame(glide);
       };
       anim = requestAnimationFrame(glide);
@@ -275,7 +291,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     e.preventDefault();
     cancelAnimationFrame(anim);
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    setPos(posX + d);
+    setPos(posX + d, true, true);
   }, { passive: false });
 
   viewport.addEventListener('keydown', (e) => {
@@ -298,8 +314,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     if (next === null) return;
     e.preventDefault();
     if (next === 0) next = next > y ? 1 : -1;
-    setPos(yearToX(next), false);
-    setState({ year: next });
+    setPos(yearToX(next), true, true);
   });
 
   root.querySelector('.tl-zoom')!.addEventListener('click', (e) => {
@@ -313,7 +328,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
 
   function goToEpoch(id: string) {
     const ep = epochs.find((e) => e.id === id);
-    if (ep) animateTo(yearToX(ep.start) + 2);
+    if (ep) animateTo(yearToX(ep.start) + 2, 700, true);
   }
 
   function goToEvent(id: string) {

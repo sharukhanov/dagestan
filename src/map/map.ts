@@ -213,19 +213,22 @@ function renderLegend(year: number, items: PolityProps[]) {
   lastLegend = key;
   const span = (p: PolityProps) => `${yearText(p.start).replace(' г.', '')}–${yearText(p.end)}`;
   const rows = items.length
-    ? items.map((p) => `<li title="${(p.note ?? '').replace(/"/g, '&quot;')}"><i style="--c:${p.color}"></i><span>${p.name}<small>${span(p)}</small></span></li>`).join('')
-    : `<li class="empty">Зоны влияния для этого времени ещё не нанесены — появятся по мере наполнения эпох.</li>`;
+    ? items.map((p) => `<li class="lg-row" title="${(p.note ?? '').replace(/"/g, '&quot;')}"><i class="sw" style="--c:${p.color}"></i><span>${p.name}<small>${span(p)}</small></span></li>`).join('')
+    : `<li class="lg-row empty"><i aria-hidden="true"></i><span>Зоны влияния для этого времени ещё не нанесены — появятся по мере наполнения эпох.</span></li>`;
   el.classList.toggle('collapsed', !legendOpen);
   el.innerHTML = `
     <button type="button" class="lg-head" aria-expanded="${legendOpen}">
-      <b>На карте: ${yearText(year)}</b><span class="lg-count">${items.length || ''}</span><span class="lg-chev">${legendOpen ? '▾' : '▸'}</span>
+      <b>На карте: ${yearText(year)}</b>
+      ${items.length ? `<span class="lg-count">${items.length}</span>` : ''}
+      <span class="lg-chev" aria-hidden="true">${legendOpen ? '▾' : '▸'}</span>
     </button>
     <div class="lg-body">
-      <ul>${rows}</ul>
-      <p class="lg-outline"><i></i>Граница современного Дагестана — для ориентира</p>
-      <details class="lg-more"><summary>Как читать карту</summary>
-      <p class="lg-note">Зоны показывают, кто контролировал территорию в выбранный год, поэтому при движении шкалы они сменяют друг друга. Границы примерные; подробности — при наведении на название.</p>
-      <p class="lg-note">Берега и реки — современные. Уровень Каспия менялся: в геологическом прошлом (четвертичный период) море не раз заливало почти всю приморскую равнину; стены Дербента в VI в. уходили в море примерно на 150 м.</p>
+      <ul class="lg-list">${rows}
+        <li class="lg-row lg-outline"><i aria-hidden="true"></i><span>Граница Дагестана сегодня<small>для ориентира</small></span></li>
+      </ul>
+      <details class="lg-more"><summary><i aria-hidden="true">i</i><span>Как читать карту</span></summary>
+        <p class="lg-note">Зоны показывают, кто контролировал территорию в выбранный год, поэтому при движении шкалы они сменяют друг друга. Границы примерные; подробности — при наведении на название.</p>
+        <p class="lg-note">Берега и реки — современные. Уровень Каспия менялся: в геологическом прошлом (четвертичный период) море не раз заливало почти всю приморскую равнину; стены Дербента в VI в. уходили в море примерно на 150 м.</p>
       </details>
     </div>`;
   el.querySelector('.lg-head')!.addEventListener('click', () => {
