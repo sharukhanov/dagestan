@@ -18,7 +18,13 @@ const SEAS: { name: string; coords: [number, number]; size: number }[] = [
 let map: MlMap;
 let eventWindow = 50;
 const eventMarkers = new Map<string, { marker: maplibregl.Marker; el: HTMLElement; ev: HistEvent }>();
-const placeMarkers: { el: HTMLElement; start: number; end: number | null; type: Place['type'] }[] = [];
+const placeMarkers: { el: HTMLElement; start: number; end: number | null; type: Place['type']; place: Place; shown: string }[] = [];
+
+/** Название места в данном году (из истории названий), иначе основное. */
+function placeName(p: Place, year: number): string {
+  const hist = (p.names ?? []).filter((n) => n.from <= year).sort((a, b) => b.from - a.from);
+  return hist[0]?.name ?? p.name;
+}
 const polityLabels: { el: HTMLElement; props: PolityProps }[] = [];
 
 function polityFilter(year: number): ExpressionSpecification {
@@ -87,10 +93,11 @@ export function initMap(container: HTMLElement): MlMap {
     const el = document.createElement('div');
     el.className = `place place-${p.type}`;
     el.innerHTML = `<i></i><span></span>`;
-    el.querySelector('span')!.textContent = p.name;
-    el.title = [p.name, ...p.altNames].join(' / ') + (p.note ? `\n${p.note}` : '');
+    const hist = (p.names ?? []).slice().sort((a, b) => a.from - b.from)
+      .map((n) => `${n.approx ? '≈' : ''}${n.from < 0 ? `${-n.from} до н. э.` : n.from} — ${n.name}`);
+    el.title = (hist.length ? hist.join('\n') : [p.name, ...p.altNames].join(' / ')) + (p.note ? `\n${p.note}` : '');
     new maplibregl.Marker({ element: el, anchor: 'left', offset: [-5, 0] }).setLngLat(p.coords).addTo(map);
-    placeMarkers.push({ el, start: p.start, end: p.end, type: p.type });
+    placeMarkers.push({ el, start: p.start, end: p.end, type: p.type, place: p, shown: '' });
   }
 
   for (const ev of events) {
@@ -145,8 +152,10 @@ function update(year: number) {
   }
   renderLegend(year, [...visible.values()]);
 
-  for (const { el, start, end } of placeMarkers) {
-    el.classList.toggle('hidden', !(year >= start && (end === null || year <= end)));
+  for (const m of placeMarkers) {
+    m.el.classList.toggle('hidden', !(year >= m.start && (m.end === null || year <= m.end)));
+    const name = placeName(m.place, year);
+    if (name !== m.shown) { m.el.querySelector('span')!.textContent = name; m.shown = name; }
   }
   for (const { el, ev } of eventMarkers.values()) {
     const [a, b] = eventSpan(ev);

@@ -99,6 +99,13 @@ export const PlaceSchema = z.object({
   end: year.nullable(),
   /** true — годы условные. */
   approx: z.boolean().default(false),
+  /** История названий: с какого года какое имя показывать на карте. */
+  names: z.array(z.object({
+    from: year,
+    name: z.string(),
+    approx: z.boolean().default(false),
+    source: SourceRefSchema.optional(),
+  })).default([]),
   note: z.string().optional(),
   sources: z.array(SourceRefSchema).default([]),
 });

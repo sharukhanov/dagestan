@@ -121,6 +121,16 @@ npm run add-image -- "File:Имя файла на Commons.jpg" andalal-1741 "П�
 
 `type`: `city`, `fortress`, `settlement`, `monument`. `end: null` — существует до сих пор. `approx: true` — годы условные.
 
+Если город переименовывали, добавьте историю названий — подпись на карте будет меняться вместе со шкалой:
+
+```json
+"names": [
+  { "from": 1842, "name": "Петровское укрепление", "source": { "id": "istoriya-dagestana-1968-t2", "pages": "с. 38" } },
+  { "from": 1857, "name": "Петровск (Порт-Петровск)" },
+  { "from": 1921, "name": "Махачкала", "approx": true }
+]
+```
+
 ## sources.json — источники
 
 ```json
