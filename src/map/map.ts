@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre 6 грузит воркер отдельным модулем — отдаём его через Vite, иначе на сборке он теряется.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { buildStyle, makeHatch, POLITY_PAINT, type PolityOpacity } from './basemaps';
-import { events, places, polities, eventSpan } from '../data';
+import { epochAt, events, places, polities, eventSpan } from '../data';
 import type { HistEvent, Place, PolityProps } from '../schema';
 import { getState, setState, subscribe, type Theme } from '../state';
 
@@ -16,7 +16,6 @@ const SEAS: { name: string; coords: [number, number]; size: number }[] = [
 ];
 
 let map: MlMap;
-let eventWindow = 50;
 const eventMarkers = new Map<string, { marker: maplibregl.Marker; el: HTMLElement; ev: HistEvent }>();
 const placeMarkers: { el: HTMLElement; start: number; end: number | null; type: Place['type']; place: Place; shown: string }[] = [];
 
@@ -200,12 +199,6 @@ export function initMap(container: HTMLElement): MlMap {
   return map;
 }
 
-/** Ширина «окна» шкалы в годах: события внутри окна видны на карте. */
-export function setEventWindow(years: number) {
-  eventWindow = years;
-  update(getState().year);
-}
-
 function update(year: number) {
   const { eventId } = getState();
   setPolityTargets(year);
@@ -222,11 +215,12 @@ function update(year: number) {
     const name = placeName(m.place, year);
     if (name !== m.shown) { m.el.querySelector('span')!.textContent = name; m.shown = name; }
   }
+  // На карте — только события текущей эпохи (и открытое событие).
+  const epochId = epochAt(year)?.id;
   for (const { el, ev } of eventMarkers.values()) {
     const [a, b] = eventSpan(ev);
-    const near = year >= a - eventWindow && year <= b + eventWindow;
     const selected = ev.id === eventId;
-    el.classList.toggle('hidden', !near && !selected);
+    el.classList.toggle('hidden', ev.epoch !== epochId && !selected);
     el.classList.toggle('selected', selected);
     el.classList.toggle('current', year >= a && year <= b);
   }

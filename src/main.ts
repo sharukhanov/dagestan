@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { initMap, setEventWindow } from './map/map';
+import { initMap } from './map/map';
 import { initTimeline } from './timeline/timeline';
 import { initCard } from './card/card';
 import { initSourcesPanel } from './sources/panel';
@@ -12,7 +12,7 @@ readHash({ year: first?.start.year ?? 550, eventId: null, theme: 'old' });
 document.documentElement.dataset.theme = getState().theme;
 
 initMap(document.getElementById('map')!);
-initTimeline(document.getElementById('timeline')!, { onWindowChange: setEventWindow });
+initTimeline(document.getElementById('timeline')!);
 initCard(document.getElementById('card')!);
 initSourcesPanel(document.getElementById('src-btn')!);
 followHash();

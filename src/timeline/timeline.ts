@@ -1,15 +1,13 @@
 // Временная шкала: перетаскивается мышью и пальцем, с инерцией,
-// цветными полосами эпох, дорожкой событий и стрелками «предыдущее / следующее».
+// цветными полосами эпох, дорожкой событий и стрелками «предыдущая / следующая эпоха».
 //
 // Масштаб неравномерный: ширина отрезка растёт логарифмически от длительности,
 // поэтому тысячелетия древности и четыре года революции обе остаются читаемыми.
-import { epochs, events, eventSpan, yearLabel, centuryOf } from '../data';
-import type { HistEvent } from '../schema';
+import { byDate, epochAt, epochs, events, eventSpan, yearLabel, centuryOf } from '../data';
 import { getState, setState, subscribe } from '../state';
 
 interface Segment { start: number; end: number; x0: number; x1: number; color: string; title: string; id: string | null }
 
-const byDate = (e: HistEvent) => e.start.year * 400 + (e.start.month ?? 0) * 32 + (e.start.day ?? 0);
 const sorted = events.slice().sort((a, b) => byDate(a) - byDate(b));
 
 /** На сколько пикселей шкалы нужно увести бегунок от открытого события, чтобы карточка закрылась. */
@@ -17,12 +15,7 @@ const CLOSE_DISTANCE_PX = 150;
 
 const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
 
-export interface TimelineOptions {
-  /** Сколько лет вокруг бегунка считается «текущим моментом» для показа событий. */
-  onWindowChange: (years: number) => void;
-}
-
-export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
+export function initTimeline(root: HTMLElement) {
   root.innerHTML = `
     <div class="tl-viewport" tabindex="0" role="slider" aria-label="Год">
       <div class="tl-track"></div>
@@ -30,12 +23,12 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     <span class="tl-lane-label" aria-hidden="true">события</span>
     <div class="tl-needle" aria-hidden="true"><div class="tl-bubble"><b></b><small></small></div></div>
     <div class="tl-nav">
-      <button type="button" class="tl-step prev" aria-label="Предыдущее событие"><span class="arr">‹</span><span class="txt"></span></button>
+      <button type="button" class="tl-step prev" aria-label="Предыдущая эпоха"><span class="arr">‹</span><span class="txt"></span></button>
       <div class="tl-zoom">
         <button type="button" data-z="-1" aria-label="Уменьшить масштаб шкалы">−</button>
         <button type="button" data-z="1" aria-label="Увеличить масштаб шкалы">+</button>
       </div>
-      <button type="button" class="tl-step next" aria-label="Следующее событие"><span class="txt"></span><span class="arr">›</span></button>
+      <button type="button" class="tl-step next" aria-label="Следующая эпоха"><span class="txt"></span><span class="arr">›</span></button>
     </div>`;
   const viewport = root.querySelector<HTMLElement>('.tl-viewport')!;
   const track = root.querySelector<HTMLElement>('.tl-track')!;
@@ -91,11 +84,6 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     const s = segments.find((g) => x <= g.x1) ?? segments[segments.length - 1];
     const t = (Math.min(Math.max(x, s.x0), s.x1) - s.x0) / (s.x1 - s.x0);
     return s.start + t * (s.end - s.start);
-  }
-
-  function pxPerYearAt(x: number): number {
-    const s = segments.find((g) => x <= g.x1) ?? segments[segments.length - 1];
-    return (s.x1 - s.x0) / (s.end - s.start);
   }
 
   const roundYear = (y: number) => {
@@ -165,7 +153,6 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     viewport.setAttribute('aria-valuenow', String(y));
     viewport.setAttribute('aria-valuetext', `${yearLabel(y)} год`);
     updateNav(y);
-    opts.onWindowChange(Math.max(0.5, 36 / pxPerYearAt(posX)));
   }
 
   function setPos(x: number, commit = true, user = false) {
@@ -186,15 +173,24 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     setState({ year });
   }
 
-  function animateTo(x: number, duration = 700, user = false) {
+  // Плавный переезд бегунка. commit=false — только картинка: год уже выставлен заранее,
+  // чтобы карта переключилась сразу, а не после анимации.
+  let visualOnly = false;
+  function stopAnim() {
     cancelAnimationFrame(anim);
+    visualOnly = false;
+  }
+  function animateTo(x: number, duration = 700, user = false, commit = true) {
+    stopAnim();
+    visualOnly = !commit;
     const from = posX;
     const t0 = performance.now();
     const step = (t: number) => {
       const k = Math.min(1, (t - t0) / duration);
       const e = 1 - Math.pow(1 - k, 3);
-      setPos(from + (x - from) * e, k === 1, user);
+      setPos(from + (x - from) * e, commit && k === 1, user);
       if (k < 1) anim = requestAnimationFrame(step);
+      else visualOnly = false;
     };
     anim = requestAnimationFrame(step);
   }
@@ -211,7 +207,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
 
   viewport.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
-    cancelAnimationFrame(anim);
+    stopAnim();
     dragging = true;
     moved = false;
     startX = lastX = e.clientX;
@@ -264,37 +260,32 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     if (band) goToEpoch(band.dataset.epoch!);
   }, true);
 
-  // --- Стрелки «предыдущее / следующее событие» ---
+  // --- Стрелки «предыдущая / следующая эпоха» ---
 
-  function neighbours(y: number): [HistEvent | undefined, HistEvent | undefined] {
-    const id = getState().eventId;
-    const i = id ? sorted.findIndex((e) => e.id === id) : -1;
-    if (i >= 0) return [sorted[i - 1], sorted[i + 1]];
-    return [
-      [...sorted].reverse().find((e) => e.start.year < y),
-      sorted.find((e) => e.start.year > y),
-    ];
+  function epochNeighbours(y: number) {
+    const i = epochs.findIndex((e) => e.id === epochAt(y)?.id);
+    return [epochs[i - 1], epochs[i + 1]] as const;
   }
 
   function updateNav(y: number) {
-    const [p, n] = neighbours(y);
-    for (const [btn, ev] of [[prevBtn, p], [nextBtn, n]] as const) {
-      btn.disabled = !ev;
-      btn.dataset.event = ev?.id ?? '';
-      btn.querySelector('.txt')!.textContent = ev ? `${yearLabel(ev.start.year)} · ${ev.title}` : '';
-      btn.title = ev ? `${ev.title} (${yearLabel(ev.start.year)})` : '';
+    const [p, n] = epochNeighbours(y);
+    for (const [btn, ep] of [[prevBtn, p], [nextBtn, n]] as const) {
+      btn.disabled = !ep;
+      btn.dataset.epoch = ep?.id ?? '';
+      btn.querySelector('.txt')!.textContent = ep ? ep.title : '';
+      btn.title = ep ? `${ep.title} (${yearLabel(ep.start)} — ${yearLabel(ep.end)})` : '';
     }
   }
 
   for (const btn of [prevBtn, nextBtn]) {
     btn.addEventListener('click', () => {
-      if (btn.dataset.event) goToEvent(btn.dataset.event);
+      if (btn.dataset.epoch) goToEpoch(btn.dataset.epoch);
     });
   }
 
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
-    cancelAnimationFrame(anim);
+    stopAnim();
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     setPos(posX + d, true, true);
   }, { passive: false });
@@ -309,9 +300,9 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     else if (e.key === 'PageDown') next = y + 100;
     else if (e.key === 'Home') next = epochs[0].start;
     else if (e.key === ']' || e.key === '[') {
-      const [p, n] = neighbours(y);
-      const ev = e.key === ']' ? n : p;
-      if (ev) goToEvent(ev.id);
+      const [p, n] = epochNeighbours(y);
+      const ep = e.key === ']' ? n : p;
+      if (ep) goToEpoch(ep.id);
       e.preventDefault();
       return;
     }
@@ -331,9 +322,12 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     setPos(yearToX(year), false);
   });
 
+  // Переход к эпохе: карта переключается сразу, бегунок плавно догоняет.
   function goToEpoch(id: string) {
     const ep = epochs.find((e) => e.id === id);
-    if (ep) animateTo(yearToX(ep.start) + 2, 700, true);
+    if (!ep) return;
+    animateTo(yearToX(ep.start), 700, false, false);
+    setState({ year: ep.start, eventId: null });
   }
 
   function goToEvent(id: string) {
@@ -349,7 +343,7 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     if (s.eventId && s.eventId !== prev.eventId) {
       const ev = events.find((e) => e.id === s.eventId);
       if (ev && roundYear(xToYear(posX)) !== ev.start.year) animateTo(yearToX(ev.start.year), 900);
-    } else if (s.year !== prev.year && !dragging && roundYear(xToYear(posX)) !== s.year) {
+    } else if (s.year !== prev.year && !dragging && !visualOnly && roundYear(xToYear(posX)) !== s.year) {
       setPos(yearToX(s.year), false);
     }
   });

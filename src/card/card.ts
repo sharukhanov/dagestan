@@ -1,5 +1,5 @@
 // Карточка события: боковая панель на десктопе, выезжающая снизу — на телефоне.
-import { eventById, formatEventDate, sources, epochs, glossary, glossaryById } from '../data';
+import { eventById, formatEventDate, sources, epochs, eventsOfEpoch, glossary, glossaryById } from '../data';
 import type { HistEvent } from '../schema';
 import { getState, setState, subscribe } from '../state';
 
@@ -101,6 +101,21 @@ function sourcesBlock(ev: HistEvent): string {
     </details>`;
 }
 
+/** Листалка по событиям эпохи: «‹ 3 из 7 ›». */
+function epochNav(ev: HistEvent): string {
+  const list = eventsOfEpoch(ev.epoch);
+  const i = list.findIndex((e) => e.id === ev.id);
+  if (list.length < 2 || i < 0) return '';
+  const btn = (e: HistEvent | undefined, dir: 'prev' | 'next') => e
+    ? `<button type="button" class="ep-step ${dir}" data-goto="${e.id}" title="${esc(e.title)}" aria-label="${dir === 'prev' ? 'Предыдущее' : 'Следующее'} событие эпохи: ${esc(e.title)}">${dir === 'prev' ? '‹' : '›'}</button>`
+    : `<button type="button" class="ep-step ${dir}" disabled aria-hidden="true">${dir === 'prev' ? '‹' : '›'}</button>`;
+  return `<nav class="card-epnav" aria-label="События эпохи">
+    ${btn(list[i - 1], 'prev')}
+    <span>Событие <b>${i + 1}</b> из ${list.length} в этой эпохе</span>
+    ${btn(list[i + 1], 'next')}
+  </nav>`;
+}
+
 function render(ev: HistEvent): string {
   const seen = new Set<string>();
   const epoch = epochs.find((e) => e.id === ev.epoch);
@@ -114,6 +129,7 @@ function render(ev: HistEvent): string {
           <span class="epoch-chip" style="--c:${epoch?.color ?? '#888'}">${esc(epoch?.title ?? '')}</span>
           ${ev.verified ? '' : '<span class="badge todo" title="Факты ещё не сверены с источником">требует проверки</span>'}
         </p>
+        ${epochNav(ev)}
         <h2>${esc(ev.title)}</h2>
         <p class="card-date">${esc(formatEventDate(ev))} · ${esc(ev.place)}</p>
         ${ev.dateNote ? `<p class="card-datenote">${esc(ev.dateNote)}</p>` : ''}

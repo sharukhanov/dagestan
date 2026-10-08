@@ -28,6 +28,14 @@ export const glossaryById = new Map(glossary.map((g) => [g.id, g]));
 
 export const eventById = new Map(events.map((e) => [e.id, e]));
 
+/** Ключ сортировки событий по дате (год, месяц, день). */
+export const byDate = (e: HistEvent) => e.start.year * 400 + (e.start.month ?? 0) * 32 + (e.start.day ?? 0);
+
+/** События эпохи по порядку дат. */
+export function eventsOfEpoch(epochId: string): HistEvent[] {
+  return events.filter((e) => e.epoch === epochId).sort((a, b) => byDate(a) - byDate(b));
+}
+
 export const timeStart = epochs[0].start;
 export const timeEnd = epochs[epochs.length - 1].end;
 
