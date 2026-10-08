@@ -857,3 +857,8 @@ a { color: var(--accent); }
 .event-marker.far i { transform: scale(0.7); opacity: 0.5; }
 .event-marker.far:not(:hover) span { display: none; }
 .event-marker.far:hover i { opacity: 1; }
+/* дорожка событий: только текущая эпоха; близкие события — одна точка с числом */
+.tl-event i { display: grid; place-items: center; font: 700 9px/1 Inter, sans-serif; color: var(--panel-solid); }
+.tl-event.group i { width: 18px; height: 18px; margin-top: -2px; }
+/* зоны вне фокуса открытого события — их подписи тоже бледнее */
+.map-label.polity.dim:not(.off) { opacity: 0.35; }

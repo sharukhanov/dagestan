@@ -3,12 +3,11 @@
 //
 // Масштаб неравномерный: ширина отрезка растёт логарифмически от длительности,
 // поэтому тысячелетия древности и четыре года революции обе остаются читаемыми.
-import { byDate, epochAt, epochs, eventsOfEpoch, events, eventSpan, yearLabel, centuryOf } from '../data';
+import { epochAt, epochs, eventsOfEpoch, events, eventSpan, yearLabel, centuryOf } from '../data';
 import { getState, setState, subscribe } from '../state';
 
 interface Segment { start: number; end: number; x0: number; x1: number; color: string; title: string; id: string | null }
 
-const sorted = events.slice().sort((a, b) => byDate(a) - byDate(b));
 
 /** На сколько пикселей шкалы нужно увести бегунок от открытого события, чтобы карточка закрылась. */
 const CLOSE_DISTANCE_PX = 150;
@@ -125,23 +124,10 @@ export function initTimeline(root: HTMLElement) {
         parts.push(`<div class="tl-tick${major ? ' major' : ''}" style="left:${x}px"><span>${yearLabel(y, true)}</span></div>`);
       }
     }
-    // Дорожка событий: точка в начале события, полоска на его длительность и подпись,
-    // которая занимает место до следующей точки.
-    const xs = sorted.map((ev) => yearToX(ev.start.year));
-    sorted.forEach((ev, i) => {
-      const [a, b] = eventSpan(ev);
-      const x0 = xs[i];
-      const x1 = yearToX(b);
-      const room = (i + 1 < xs.length ? xs[i + 1] : x0 + 220) - x0 - 22;
-      const title = ev.title.replace(/"/g, '&quot;');
-      parts.push(
-        (x1 - x0 > 3 ? `<div class="tl-span" style="left:${x0}px;width:${x1 - x0}px"></div>` : '') +
-        `<button type="button" class="tl-event${ev.verified ? '' : ' unverified'}" data-event="${ev.id}" style="left:${x0}px" title="${title} · ${yearLabel(a)}">` +
-        `<i></i>${room > 40 ? `<span style="max-width:${Math.min(room, 200)}px">${ev.title}</span>` : ''}</button>`,
-      );
-    });
+    // Дорожка событий заполняется отдельно — только событиями текущей эпохи.
+    parts.push('<div class="tl-lane"></div>');
     track.innerHTML = parts.join('');
-    markSelected(getState().eventId);
+    renderLane();
     track.style.width = `${width}px`;
   }
 
@@ -338,16 +324,38 @@ export function initTimeline(root: HTMLElement) {
     setState({ eventId: id });
   }
 
-  // Внешние изменения года (клик по связанному событию, ссылка) — плавно едем к нему.
-  function markSelected(id: string | null) {
-    const ep = id ? events.find((e) => e.id === id)?.epoch : epochAt(getState().year)?.id;
-    for (const b of track.querySelectorAll<HTMLElement>('.tl-event')) {
-      b.classList.toggle('selected', b.dataset.event === id);
-      b.classList.toggle('other', events.find((e) => e.id === b.dataset.event)?.epoch !== ep);
+  // Дорожка событий: только события текущей эпохи. Точки, которые на шкале
+  // ближе 22 px друг к другу, собираются в одну с числом — без каши из кружков.
+  function renderLane() {
+    const lane = track.querySelector<HTMLElement>('.tl-lane');
+    if (!lane) return;
+    const id = getState().eventId;
+    const epId = (id ? events.find((e) => e.id === id)?.epoch : epochAt(getState().year)?.id) ?? '';
+    const list = eventsOfEpoch(epId);
+    const groups: { x: number; evs: typeof list }[] = [];
+    for (const ev of list) {
+      const x = yearToX(ev.start.year);
+      const g = groups[groups.length - 1];
+      if (g && x - g.x < 22) g.evs.push(ev);
+      else groups.push({ x, evs: [ev] });
     }
+    const esc = (t: string) => t.replace(/"/g, '&quot;');
+    lane.innerHTML = groups.map((g, i) => {
+      const room = (i + 1 < groups.length ? groups[i + 1].x : g.x + 220) - g.x - 24;
+      const sel = g.evs.find((e) => e.id === id);
+      const shown = sel ?? g.evs[0];
+      const n = g.evs.length;
+      const title = g.evs.map((e) => `${yearLabel(e.start.year)} · ${e.title}`).join('\n');
+      const label = n > 1 ? `${shown.title} и ещё ${n - 1}` : shown.title;
+      return `<button type="button" class="tl-event${sel ? ' selected' : ''}${n > 1 ? ' group' : ''}" data-event="${shown.id}" style="left:${g.x}px" title="${esc(title)}">` +
+        `<i>${n > 1 ? n : ''}</i>${room > 40 ? `<span style="max-width:${Math.min(room, 220)}px">${label}</span>` : ''}</button>`;
+    }).join('');
+  }
+  function markSelected() {
+    renderLane();
   }
   subscribe((s, prev) => {
-    if (s.eventId !== prev.eventId || epochAt(s.year) !== epochAt(prev.year)) { updateNav(s.year); markSelected(s.eventId); }
+    if (s.eventId !== prev.eventId || epochAt(s.year) !== epochAt(prev.year)) { updateNav(s.year); markSelected(); }
     if (s.eventId && s.eventId !== prev.eventId) {
       const ev = events.find((e) => e.id === s.eventId);
       if (ev && roundYear(xToYear(posX)) !== ev.start.year) animateTo(yearToX(ev.start.year), 900);
@@ -364,5 +372,5 @@ export function initTimeline(root: HTMLElement) {
 
   render();
   setPos(yearToX(getState().year), false);
-  markSelected(getState().eventId);
+  markSelected();
 }

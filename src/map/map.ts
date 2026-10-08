@@ -34,18 +34,54 @@ polities.features.forEach((f, k) => { (f.properties as PolityProps & { _k: numbe
 const fade = new Float32Array(N);   // 0…1 — насколько зона проявлена
 const draw = new Float32Array(N).fill(1); // 0…1 — какая доля контура прорисована
 const target = new Uint8Array(N);
-const DRAW_MS = 900, FADE_IN_MS = 600, FADE_OUT_MS = 350;
+// Открыто событие — ярко только зоны, в которых оно произошло; остальные бледнеют до контура.
+const emph = new Float32Array(N).fill(1);
+const emphTarget = new Float32Array(N).fill(1);
+const DIM_FILL = 0.15, DIM_LINE = 0.35;
+const DRAW_MS = 900, FADE_IN_MS = 600, FADE_OUT_MS = 350, EMPH_MS = 400;
 let animFrame = 0;
 let lastT = 0;
 
 const opacity: PolityOpacity = (base, kind) => {
   const pairs: (number | ExpressionSpecification)[] = [];
   for (let k = 0; k < N; k++) {
-    const v = kind === 'line' && draw[k] < 1 ? 0 : fade[k];
+    // emph: 1 — зона в фокусе, 0 — приглушена (заливка почти исчезает, контур бледнее).
+    const dim = kind === 'fill' ? DIM_FILL : DIM_LINE;
+    const v = (kind === 'line' && draw[k] < 1 ? 0 : fade[k]) * (dim + (1 - dim) * emph[k]);
     if (v > 0) pairs.push(k, +(base * v).toFixed(3));
   }
   return pairs.length ? (['match', ['get', '_k'], ...pairs, 0] as unknown as ExpressionSpecification) : 0;
 };
+
+/** Точка внутри многоугольника (луч вправо). */
+function inRing(pt: [number, number], ring: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function contains(k: number, pt: [number, number]): boolean {
+  const g = polities.features[k].geometry;
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  return polys.some((p) => inRing(pt, p[0]) && !p.slice(1).some((h) => inRing(pt, h)));
+}
+
+/** Фокус на зонах, где произошло открытое событие. Нет события или оно вне всех зон — все зоны обычные. */
+function setPolityFocus(pt: [number, number] | null, year: number) {
+  const active = [...Array(N).keys()].filter((k) => {
+    const p = polities.features[k].properties;
+    return year >= p.start && year <= p.end;
+  });
+  const hit = pt ? active.filter((k) => contains(k, pt)) : [];
+  for (let k = 0; k < N; k++) emphTarget[k] = !hit.length || hit.includes(k) ? 1 : 0;
+  for (const { el, props } of polityLabels) {
+    const k = (props as PolityProps & { _k: number })._k;
+    el.classList.toggle('dim', hit.length > 0 && !hit.includes(k));
+  }
+  if (!animFrame) { lastT = performance.now(); animFrame = requestAnimationFrame(stepPolities); }
+}
 
 function setPolityTargets(year: number) {
   for (let k = 0; k < N; k++) {
@@ -64,6 +100,11 @@ function stepPolities(t: number) {
   lastT = t;
   let busy = false;
   for (let k = 0; k < N; k++) {
+    if (emph[k] !== emphTarget[k]) {
+      const d = dt / EMPH_MS;
+      emph[k] = emph[k] < emphTarget[k] ? Math.min(emphTarget[k], emph[k] + d) : Math.max(emphTarget[k], emph[k] - d);
+      busy = true;
+    }
     if (target[k]) {
       if (draw[k] < 1) draw[k] = Math.min(1, draw[k] + dt / DRAW_MS);
       if (draw[k] > 0.35 && fade[k] < 1) fade[k] = Math.min(1, fade[k] + dt / FADE_IN_MS);
@@ -232,6 +273,8 @@ function drawRoute() {
 function update(year: number) {
   const { eventId } = getState();
   setPolityTargets(year);
+  const open = eventId ? events.find((e) => e.id === eventId) : undefined;
+  setPolityFocus(open ? open.coords : null, year);
   const visible = new Map<string, PolityProps>();
   for (const { el, props } of polityLabels) {
     const on = year >= props.start && year <= props.end;
