@@ -23,9 +23,13 @@ export function initTimeline(root: HTMLElement) {
     <div class="tl-needle" aria-hidden="true"><div class="tl-bubble"><b></b><small></small></div></div>
     <div class="tl-nav">
       <button type="button" class="tl-step prev" aria-label="Предыдущая эпоха"><span class="arr">‹</span><span class="txt"></span></button>
-      <div class="tl-zoom">
-        <button type="button" data-z="-1" aria-label="Уменьшить масштаб шкалы">−</button>
-        <button type="button" data-z="1" aria-label="Увеличить масштаб шкалы">+</button>
+      <div class="tl-mid">
+        <button type="button" class="tl-ev prev" aria-label="Предыдущее событие">‹</button>
+        <div class="tl-zoom">
+          <button type="button" data-z="-1" aria-label="Уменьшить масштаб шкалы">−</button>
+          <button type="button" data-z="1" aria-label="Увеличить масштаб шкалы">+</button>
+        </div>
+        <button type="button" class="tl-ev next" aria-label="Следующее событие">›</button>
       </div>
       <button type="button" class="tl-step next" aria-label="Следующая эпоха"><span class="txt"></span><span class="arr">›</span></button>
     </div>`;
@@ -270,6 +274,28 @@ export function initTimeline(root: HTMLElement) {
     });
   }
 
+  // --- Стрелки «предыдущее / следующее событие» (по времени, через границы эпох) ---
+  const allEvents = epochs.flatMap((ep) => eventsOfEpoch(ep.id));
+  const evPrev = root.querySelector<HTMLButtonElement>('.tl-ev.prev')!;
+  const evNext = root.querySelector<HTMLButtonElement>('.tl-ev.next')!;
+  function eventNeighbours(y: number) {
+    const id = getState().eventId;
+    const i = id ? allEvents.findIndex((e) => e.id === id) : -1;
+    if (i >= 0) return [allEvents[i - 1], allEvents[i + 1]] as const;
+    return [[...allEvents].reverse().find((e) => e.start.year < y), allEvents.find((e) => e.start.year >= y)] as const;
+  }
+  function updateEventNav(y: number) {
+    const [p, n] = eventNeighbours(y);
+    for (const [btn, ev, word] of [[evPrev, p, 'Предыдущее'], [evNext, n, 'Следующее']] as const) {
+      btn.disabled = !ev;
+      btn.dataset.event = ev?.id ?? '';
+      btn.title = ev ? `${word} событие: ${ev.title} (${yearLabel(ev.start.year)})` : '';
+    }
+  }
+  for (const btn of [evPrev, evNext]) {
+    btn.addEventListener('click', () => { if (btn.dataset.event) goToEvent(btn.dataset.event); });
+  }
+
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
     stopAnim();
@@ -356,6 +382,7 @@ export function initTimeline(root: HTMLElement) {
   }
   subscribe((s, prev) => {
     if (s.eventId !== prev.eventId || epochAt(s.year) !== epochAt(prev.year)) { updateNav(s.year); markSelected(); }
+    if (s.eventId !== prev.eventId || s.year !== prev.year) updateEventNav(s.year);
     if (s.eventId && s.eventId !== prev.eventId) {
       const ev = events.find((e) => e.id === s.eventId);
       if (ev && roundYear(xToYear(posX)) !== ev.start.year) animateTo(yearToX(ev.start.year), 900);
@@ -373,4 +400,5 @@ export function initTimeline(root: HTMLElement) {
   render();
   setPos(yearToX(getState().year), false);
   markSelected();
+  updateEventNav(getState().year);
 }

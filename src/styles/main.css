@@ -554,7 +554,22 @@ a { color: var(--accent); }
 .tl-step:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 24%, var(--panel-solid)); }
 .tl-step:active:not(:disabled) { transform: scale(0.98); }
 .tl-step:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+.tl-mid { display: flex; gap: 6px; flex: none; align-items: center; }
 .tl-zoom { display: flex; gap: 4px; flex: none; }
+/* «‹ событие» и «событие ›» — круглые кнопки цвета акцента рядом с масштабом */
+.tl-ev {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border: none; border-radius: 50%;
+  background: var(--accent);
+  color: var(--panel-solid);
+  font-size: 20px; font-weight: 700; line-height: 1;
+  padding-bottom: 2px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+.tl-ev:hover:not(:disabled) { filter: brightness(1.12); }
+.tl-ev:disabled { opacity: 0.3; cursor: default; box-shadow: none; }
 .tl-zoom button {
   width: 30px; height: 30px;
   border: 1px solid var(--line);
