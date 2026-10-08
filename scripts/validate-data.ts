@@ -127,6 +127,9 @@ for (const ev of withEvidence) {
 
 for (const p of places) {
   if (p.end !== null && p.end < p.start) errors.push(`places.json → ${p.id}: конец раньше начала`);
+  const refs = [...p.sources, ...p.names.flatMap((n) => (n.source ? [n.source] : []))];
+  for (const s of refs)
+    if (!sourceById.has(s.id)) errors.push(`places.json → ${p.id}: нет источника "${s.id}" в sources.json`);
 }
 for (const p of polities) {
   if (p.end < p.start) errors.push(`polities.geojson → ${p.polityId}: конец раньше начала`);

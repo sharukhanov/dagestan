@@ -198,14 +198,25 @@ function declutter() {
     else taken.push(r);
   }
   const order = { city: 0, fortress: 1, settlement: 2, monument: 3 } as const;
-  const ps = placeMarkers.filter((p) => visible(p.el)).sort((a, b) => order[a.type] - order[b.type]);
+  const ps = placeMarkers.filter((p) => visible(p.el))
+    .sort((a, b) => a.place.rank - b.place.rank || order[a.type] - order[b.type]);
   for (const p of ps) taken.push(p.el.querySelector('i')!.getBoundingClientRect());
+  // Подпись ставим справа от точки; если там тесно — слева, сверху или снизу; если везде занято — прячем.
+  const sides = ['', 'left', 'top', 'bottom'] as const;
   for (const p of ps) {
     const span = p.el.querySelector('span')!;
     span.classList.remove('collide');
-    const r = span.getBoundingClientRect();
-    if (overlaps(r)) span.classList.add('collide');
-    else taken.push(r);
+    let placed = false;
+    for (const side of sides) {
+      p.el.classList.remove(...sides.filter(Boolean));
+      if (side) p.el.classList.add(side);
+      const r = span.getBoundingClientRect();
+      if (!overlaps(r)) { taken.push(r); placed = true; break; }
+    }
+    if (!placed) {
+      p.el.classList.remove(...sides.filter(Boolean));
+      span.classList.add('collide');
+    }
   }
 }
 

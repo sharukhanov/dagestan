@@ -99,6 +99,8 @@ export const PlaceSchema = z.object({
   end: year.nullable(),
   /** true — годы условные. */
   approx: z.boolean().default(false),
+  /** Важность подписи: 1 — главные города (их подпись не прячется ради соседей), 2 — остальные. */
+  rank: z.number().int().min(1).max(2).default(2),
   /** История названий: с какого года какое имя показывать на карте. */
   names: z.array(z.object({
     from: year,

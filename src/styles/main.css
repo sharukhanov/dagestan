@@ -285,6 +285,10 @@ a { color: var(--accent); }
 }
 .place-fortress i { border-radius: 1px; transform: rotate(45deg); }
 .place-city span { font-weight: 600; }
+.place.left span, .place.top span, .place.bottom span { position: absolute; white-space: nowrap; }
+.place.left span { right: 100%; margin-right: 5px; }
+.place.top span { bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 1px; }
+.place.bottom span { top: 100%; left: 50%; transform: translateX(-50%); margin-top: 1px; }
 :root[data-theme='old'] .place { font-family: 'PT Serif', Georgia, serif; font-size: 13px; }
 
 .event-marker {
