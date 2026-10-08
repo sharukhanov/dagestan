@@ -4,7 +4,7 @@ import { initTimeline } from './timeline/timeline';
 import { initCard } from './card/card';
 import { initSourcesPanel } from './sources/panel';
 import { epochAt, events } from './data';
-import { getState, readHash, setState, subscribe } from './state';
+import { followHash, getState, readHash, setState, subscribe } from './state';
 
 const first = events.slice().sort((a, b) => a.start.year - b.start.year)[0];
 readHash({ year: first?.start.year ?? 550, eventId: null, theme: 'old' });
@@ -14,6 +14,7 @@ initMap(document.getElementById('map')!);
 initTimeline(document.getElementById('timeline')!, { onWindowChange: setEventWindow });
 initCard(document.getElementById('card')!);
 initSourcesPanel(document.getElementById('src-btn')!);
+followHash();
 
 // Название текущей эпохи в шапке.
 const epochNow = document.getElementById('epoch-now')!;

@@ -91,5 +91,10 @@ export function initSourcesPanel(button: HTMLElement) {
   document.addEventListener('click', (e) => {
     if (!panel.hidden && !panel.contains(e.target as Node) && e.target !== button) close();
   });
-  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  // Esc закрывает сначала панель и не доходит до карточки события под ней.
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || panel.hidden) return;
+    e.stopImmediatePropagation();
+    close();
+  }, true);
 }

@@ -12,6 +12,9 @@ interface Segment { start: number; end: number; x0: number; x1: number; color: s
 const byDate = (e: HistEvent) => e.start.year * 400 + (e.start.month ?? 0) * 32 + (e.start.day ?? 0);
 const sorted = events.slice().sort((a, b) => byDate(a) - byDate(b));
 
+/** На сколько пикселей шкалы нужно увести бегунок от открытого события, чтобы карточка закрылась. */
+const CLOSE_DISTANCE_PX = 150;
+
 const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
 
 export interface TimelineOptions {
@@ -174,9 +177,11 @@ export function initTimeline(root: HTMLElement, opts: TimelineOptions) {
     const id = getState().eventId;
     const ev = user && id ? events.find((e) => e.id === id) : undefined;
     if (ev) {
+      // Закрываем, только когда событие заметно отошло от бегунка (а не от случайного сдвига).
       const [a, b] = eventSpan(ev);
-      const w = Math.max(0.5, 36 / pxPerYearAt(posX));
-      if (year < a - w || year > b + w) { setState({ year, eventId: null }); return; }
+      const xa = yearToX(a), xb = yearToX(b);
+      const dist = posX < xa ? xa - posX : posX > xb ? posX - xb : 0;
+      if (dist > CLOSE_DISTANCE_PX) { setState({ year, eventId: null }); return; }
     }
     setState({ year });
   }

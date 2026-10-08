@@ -33,6 +33,26 @@ export function subscribe(l: Listener) {
   return () => listeners.delete(l);
 }
 
+function parseHash(hash: string, fallback: AppState): AppState {
+  const p = new URLSearchParams(hash.replace(/^#/, ''));
+  const y = Number(p.get('y'));
+  const m = p.get('map');
+  return {
+    year: p.has('y') && Number.isFinite(y) && y !== 0 ? Math.round(y) : fallback.year,
+    eventId: p.get('e') || null,
+    theme: m === 'old' || m === 'modern' ? m : fallback.theme,
+  };
+}
+
+/** Ссылку вставили в адресную строку уже открытой страницы или нажали «назад» — применяем её. */
+export function followHash() {
+  window.addEventListener('hashchange', (e) => {
+    // Адрес берём из самого события: отложенная запись могла уже перезаписать location.hash.
+    clearTimeout(hashTimer);
+    setState(parseHash(new URL(e.newURL).hash, state));
+  });
+}
+
 export function readHash(defaults: AppState): AppState {
   const p = new URLSearchParams(location.hash.slice(1));
   const y = Number(p.get('y'));
