@@ -48,6 +48,8 @@ export const PALETTES: Record<Theme, Palette> = {
 };
 
 /** Прозрачность зоны: base — «полная» прозрачность слоя; kind — заливка или контур. */
+const ROUTE: Record<Theme, string> = { old: '#9b2f1c', modern: '#e0a35c' };
+
 export type PolityOpacity = (base: number, kind: 'fill' | 'line') => ExpressionSpecification | number;
 
 /** Слои зон, у которых анимируется прозрачность: при смене года зоны проявляются и гаснут. */
@@ -110,7 +112,10 @@ function outlines(fc: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
   };
 }
 
-export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection, op: PolityOpacity): StyleSpecification {
+/** Пустая «тропа» событий эпохи — данные подставляет карта. */
+export const EMPTY_ROUTE: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+
+export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection, op: PolityOpacity, route = EMPTY_ROUTE): StyleSpecification {
   const p = PALETTES[theme];
   // На «старой карте» современных водохранилищ нет.
   const lakeFilter: ExpressionSpecification = theme === 'old'
@@ -153,6 +158,7 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
       dagestan: { type: 'geojson', data: `${base}basemap/dagestan.geojson` },
       polities: { type: 'geojson', data: politiesData },
       'polity-outline': { type: 'geojson', data: outlines(politiesData), lineMetrics: true },
+      route: { type: 'geojson', data: route },
     },
     layers: [
       { id: 'land', type: 'background', paint: { 'background-color': p.land } },
@@ -201,6 +207,17 @@ export function buildStyle(theme: Theme, politiesData: GeoJSON.FeatureCollection
           'line-opacity': theme === 'old' ? 0.55 : 0.45,
           'line-dasharray': [2, 2],
         },
+      },
+      // «Тропа» событий эпохи по порядку: пройденная часть — сплошная, впереди — пунктир.
+      {
+        id: 'route-todo', type: 'line', source: 'route', filter: ['==', ['get', 'part'], 'todo'],
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': ROUTE[theme], 'line-width': 2, 'line-opacity': 0.45, 'line-dasharray': [1.5, 2] },
+      },
+      {
+        id: 'route-done', type: 'line', source: 'route', filter: ['==', ['get', 'part'], 'done'],
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': ROUTE[theme], 'line-width': 3, 'line-opacity': 0.8 },
       },
     ],
   };

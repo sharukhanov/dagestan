@@ -831,3 +831,25 @@ a { color: var(--accent); }
 }
 .ep-step:hover:not(:disabled) { filter: brightness(1.12); }
 .ep-step:disabled { opacity: 0.25; cursor: default; box-shadow: none; }
+
+/* ===== События эпохи как история по порядку ===== */
+.event-marker { width: 24px; height: 24px; }
+.event-marker i {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border-width: 2px;
+}
+.event-marker i b { font: 700 11.5px/1 Inter, sans-serif; color: var(--panel-solid); }
+.event-marker span { left: 32px; }
+/* уже пройденные — приглушены, будущие — бледные и пустые внутри */
+.event-marker.done i { opacity: 0.7; transform: scale(0.85); }
+.event-marker.upcoming i { background: var(--panel-solid); border: 2px solid var(--event); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+.event-marker.upcoming i b { color: var(--event); }
+.event-marker.upcoming span { opacity: 0.75; }
+.event-marker.selected i { transform: scale(1.3); opacity: 1; }
+/* когда открыто событие, подписи остальных прячем — видны номер и тропа */
+.story .event-marker:not(.selected):not(:hover) span { display: none; }
+.event-marker.current i { animation: none; }
+/* на шкале события других эпох отходят на второй план */
+.tl-event.other { opacity: 0.35; }
+.tl-event.other:hover { opacity: 0.8; }

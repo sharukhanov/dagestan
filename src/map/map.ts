@@ -4,8 +4,8 @@ import type { ExpressionSpecification, LineLayerSpecification, Map as MlMap } fr
 import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre 6 грузит воркер отдельным модулем — отдаём его через Vite, иначе на сборке он теряется.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import { buildStyle, makeHatch, POLITY_PAINT, type PolityOpacity } from './basemaps';
-import { epochAt, events, places, polities, eventSpan } from '../data';
+import { buildStyle, EMPTY_ROUTE, makeHatch, POLITY_PAINT, type PolityOpacity } from './basemaps';
+import { epochAt, events, eventsOfEpoch, places, polities, eventSpan } from '../data';
 import type { HistEvent, Place, PolityProps } from '../schema';
 import { getState, setState, subscribe, type Theme } from '../state';
 
@@ -172,7 +172,7 @@ export function initMap(container: HTMLElement): MlMap {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'event-marker' + (ev.verified ? '' : ' unverified');
-    el.innerHTML = `<i></i><span></span>`;
+    el.innerHTML = `<i><b></b></i><span></span>`;
     el.querySelector('span')!.textContent = ev.title;
     el.setAttribute('aria-label', ev.title);
     el.addEventListener('click', (e) => {
@@ -188,6 +188,8 @@ export function initMap(container: HTMLElement): MlMap {
   });
 
   map.on('load', paintPolities);
+  // Тропа считается до загрузки стиля — после загрузки (и смены подложки) отдаём её карте.
+  map.on('style.load', () => (map.getSource('route') as maplibregl.GeoJSONSource | undefined)?.setData(routeData));
   update(getState().year);
   if (getState().eventId) focusEvent(getState().eventId!, false);
   map.on('move', scheduleDeclutter);
@@ -197,6 +199,33 @@ export function initMap(container: HTMLElement): MlMap {
     if (s.eventId && s.eventId !== prev.eventId) focusEvent(s.eventId);
   });
   return map;
+}
+
+let routeData: GeoJSON.FeatureCollection = EMPTY_ROUTE;
+let routeList: HistEvent[] = [];
+let routeCur = -1;
+let routeKey = '';
+/** Где на экране реально стоит маркер события (с учётом раскладки веером), в координатах карты. */
+const shownAt = new Map<string, [number, number]>();
+
+/** Линия, соединяющая события эпохи по порядку: до текущего — сплошная, дальше — пунктир. */
+function setRoute(list: HistEvent[], cur: number) {
+  routeList = list;
+  routeCur = cur;
+  drawRoute();
+}
+
+function drawRoute() {
+  const pts = routeList.map((e) => shownAt.get(e.id) ?? e.coords);
+  const key = JSON.stringify([pts, routeCur]);
+  if (key === routeKey) return;
+  routeKey = key;
+  const cut = Math.max(0, routeCur);
+  const feats: GeoJSON.Feature[] = [];
+  if (cut > 0) feats.push({ type: 'Feature', properties: { part: 'done' }, geometry: { type: 'LineString', coordinates: pts.slice(0, cut + 1) } });
+  if (pts.length - cut > 1) feats.push({ type: 'Feature', properties: { part: 'todo' }, geometry: { type: 'LineString', coordinates: pts.slice(cut) } });
+  routeData = { type: 'FeatureCollection', features: feats };
+  (map?.getSource('route') as maplibregl.GeoJSONSource | undefined)?.setData(routeData);
 }
 
 function update(year: number) {
@@ -215,12 +244,28 @@ function update(year: number) {
     const name = placeName(m.place, year);
     if (name !== m.shown) { m.el.querySelector('span')!.textContent = name; m.shown = name; }
   }
-  // На карте — только события текущей эпохи (и открытое событие).
-  const epochId = epochAt(year)?.id;
+  // На карте — только события текущей эпохи, пронумерованные по порядку дат.
+  // Пройденные (раньше текущего) — приглушены, будущие — бледные, текущее — крупно с подписью.
+  const epochId = eventId ? events.find((e) => e.id === eventId)?.epoch : epochAt(year)?.id;
+  const list = epochId ? eventsOfEpoch(epochId) : [];
+  const sel = eventId ? list.findIndex((e) => e.id === eventId) : -1;
+  // Без открытого события «текущим» считаем последнее событие, начавшееся к этому году.
+  const cur = sel >= 0 ? sel : list.reduce((acc, e, i) => (e.start.year <= year ? i : acc), -1);
+  const order = new Map(list.map((e, i) => [e.id, i]));
+  setRoute(list, cur);
+  map.getContainer().classList.toggle('story', sel >= 0);
   for (const { el, ev } of eventMarkers.values()) {
     const [a, b] = eventSpan(ev);
     const selected = ev.id === eventId;
-    el.classList.toggle('hidden', ev.epoch !== epochId && !selected);
+    const i = order.get(ev.id);
+    el.classList.toggle('hidden', i === undefined);
+    if (i !== undefined) {
+      el.querySelector('b')!.textContent = String(i + 1);
+      el.querySelector('span')!.textContent = `${i + 1}. ${ev.title}`;
+      el.classList.toggle('done', i < cur);
+      el.classList.toggle('upcoming', i > cur);
+      el.style.zIndex = selected ? '5' : '';
+    }
     el.classList.toggle('selected', selected);
     el.classList.toggle('current', year >= a && year <= b);
   }
@@ -239,10 +284,39 @@ function scheduleDeclutter() {
   });
 }
 
+/** События в одном месте (Гимры, Ахульго, Дарго…) не накладываются: раскладываем их веером вокруг общей точки. */
+function spreadEvents(ms: { marker: maplibregl.Marker; ev: HistEvent }[]) {
+  const pts = ms.map((m) => map.project(m.ev.coords));
+  const group = new Array<number>(ms.length).fill(-1);
+  const groups: number[][] = [];
+  for (let i = 0; i < ms.length; i++) {
+    if (group[i] >= 0) continue;
+    const g = [i];
+    group[i] = groups.length;
+    for (let j = i + 1; j < ms.length; j++) {
+      if (group[j] < 0 && g.some((k) => Math.hypot(pts[k].x - pts[j].x, pts[k].y - pts[j].y) < 24)) { g.push(j); group[j] = groups.length; }
+    }
+    groups.push(g);
+  }
+  for (const g of groups) {
+    const r = g.length > 1 ? 12 + 5 * g.length : 0;
+    g.forEach((k, n) => {
+      const a = -Math.PI / 2 + (2 * Math.PI * n) / g.length;
+      const off: [number, number] = r ? [Math.round(r * Math.cos(a)), Math.round(r * Math.sin(a))] : [0, 0];
+      ms[k].marker.setOffset(off);
+      const ll = off[0] || off[1] ? map.unproject([pts[k].x + off[0], pts[k].y + off[1]]) : null;
+      if (ll) shownAt.set(ms[k].ev.id, [ll.lng, ll.lat]);
+      else shownAt.delete(ms[k].ev.id);
+    });
+  }
+  drawRoute();
+}
+
 function declutter() {
   const taken: DOMRect[] = [];
   const overlaps = (r: DOMRect) => taken.some((t) => r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top);
   const visible = (el: HTMLElement) => !el.classList.contains('hidden');
+  spreadEvents([...eventMarkers.values()].filter((m) => visible(m.el)));
   const eventsFirst = [...eventMarkers.values()]
     .filter((m) => visible(m.el))
     .sort((a, b) => Number(b.el.classList.contains('selected')) - Number(a.el.classList.contains('selected')));
@@ -322,7 +396,7 @@ function renderLegend(year: number, items: PolityProps[]) {
 function applyTheme(theme: Theme) {
   // При смене подложки дорисовку контуров завершаем сразу.
   draw.fill(1);
-  map.setStyle(buildStyle(theme, polities, opacity), { diff: false });
+  map.setStyle(buildStyle(theme, polities, opacity, routeData), { diff: false });
   document.documentElement.dataset.theme = theme;
 }
 

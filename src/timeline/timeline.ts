@@ -3,7 +3,7 @@
 //
 // Масштаб неравномерный: ширина отрезка растёт логарифмически от длительности,
 // поэтому тысячелетия древности и четыре года революции обе остаются читаемыми.
-import { byDate, epochAt, epochs, events, eventSpan, yearLabel, centuryOf } from '../data';
+import { byDate, epochAt, epochs, eventsOfEpoch, events, eventSpan, yearLabel, centuryOf } from '../data';
 import { getState, setState, subscribe } from '../state';
 
 interface Segment { start: number; end: number; x0: number; x1: number; color: string; title: string; id: string | null }
@@ -141,6 +141,7 @@ export function initTimeline(root: HTMLElement) {
       );
     });
     track.innerHTML = parts.join('');
+    markSelected(getState().eventId);
     track.style.width = `${width}px`;
   }
 
@@ -322,12 +323,15 @@ export function initTimeline(root: HTMLElement) {
     setPos(yearToX(year), false);
   });
 
-  // Переход к эпохе: карта переключается сразу, бегунок плавно догоняет.
+  // Переход к эпохе: сразу открываем её первое событие — дальше история листается по порядку.
+  // Карта переключается сразу, бегунок плавно догоняет.
   function goToEpoch(id: string) {
     const ep = epochs.find((e) => e.id === id);
     if (!ep) return;
-    animateTo(yearToX(ep.start), 700, false, false);
-    setState({ year: ep.start, eventId: null });
+    const first = eventsOfEpoch(id)[0];
+    const year = first ? first.start.year : ep.start;
+    animateTo(yearToX(year), 700, false, false);
+    setState({ year, eventId: first?.id ?? null });
   }
 
   function goToEvent(id: string) {
@@ -335,11 +339,15 @@ export function initTimeline(root: HTMLElement) {
   }
 
   // Внешние изменения года (клик по связанному событию, ссылка) — плавно едем к нему.
-  const markSelected = (id: string | null) => {
-    for (const b of track.querySelectorAll<HTMLElement>('.tl-event')) b.classList.toggle('selected', b.dataset.event === id);
-  };
+  function markSelected(id: string | null) {
+    const ep = id ? events.find((e) => e.id === id)?.epoch : epochAt(getState().year)?.id;
+    for (const b of track.querySelectorAll<HTMLElement>('.tl-event')) {
+      b.classList.toggle('selected', b.dataset.event === id);
+      b.classList.toggle('other', events.find((e) => e.id === b.dataset.event)?.epoch !== ep);
+    }
+  }
   subscribe((s, prev) => {
-    if (s.eventId !== prev.eventId) { updateNav(s.year); markSelected(s.eventId); }
+    if (s.eventId !== prev.eventId || epochAt(s.year) !== epochAt(prev.year)) { updateNav(s.year); markSelected(s.eventId); }
     if (s.eventId && s.eventId !== prev.eventId) {
       const ev = events.find((e) => e.id === s.eventId);
       if (ev && roundYear(xToYear(posX)) !== ev.start.year) animateTo(yearToX(ev.start.year), 900);
