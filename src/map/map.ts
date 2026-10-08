@@ -214,7 +214,9 @@ function renderLegend(year: number, items: PolityProps[]) {
   const span = (p: PolityProps) => `${yearText(p.start).replace(' г.', '')}–${yearText(p.end)}`;
   const rows = items.length
     ? items.map((p) => `<li class="lg-row" title="${(p.note ?? '').replace(/"/g, '&quot;')}"><i class="sw" style="--c:${p.color}"></i><span>${p.name}<small>${span(p)}</small></span></li>`).join('')
-    : `<li class="lg-row empty"><i aria-hidden="true"></i><span>Зоны влияния для этого времени ещё не нанесены — появятся по мере наполнения эпох.</span></li>`;
+    : `<li class="lg-row empty"><i aria-hidden="true"></i><span>${year < -800
+      ? 'Государств в эту эпоху ещё не было — только общины и племена; о них рассказывают события на карте.'
+      : 'Для этого года зоны влияния не нанесены: источники не дают уверенных границ.'}</span></li>`;
   el.classList.toggle('collapsed', !legendOpen);
   el.innerHTML = `
     <button type="button" class="lg-head" aria-expanded="${legendOpen}">
