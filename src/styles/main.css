@@ -853,3 +853,7 @@ a { color: var(--accent); }
 /* на шкале события других эпох отходят на второй план */
 .tl-event.other { opacity: 0.35; }
 .tl-event.other:hover { opacity: 0.8; }
+/* дальние события эпохи: маленькая точка без подписи, не отвлекает */
+.event-marker.far i { transform: scale(0.7); opacity: 0.5; }
+.event-marker.far:not(:hover) span { display: none; }
+.event-marker.far:hover i { opacity: 1; }

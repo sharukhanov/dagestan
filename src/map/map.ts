@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 // MapLibre 6 грузит воркер отдельным модулем — отдаём его через Vite, иначе на сборке он теряется.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { buildStyle, EMPTY_ROUTE, makeHatch, POLITY_PAINT, type PolityOpacity } from './basemaps';
-import { epochAt, events, eventsOfEpoch, places, polities, eventSpan } from '../data';
+import { epochAt, epochs, events, eventsOfEpoch, places, polities, eventSpan } from '../data';
 import type { HistEvent, Place, PolityProps } from '../schema';
 import { getState, setState, subscribe, type Theme } from '../state';
 
@@ -208,9 +208,10 @@ let routeKey = '';
 /** Где на экране реально стоит маркер события (с учётом раскладки веером), в координатах карты. */
 const shownAt = new Map<string, [number, number]>();
 
-/** Линия, соединяющая события эпохи по порядку: до текущего — сплошная, дальше — пунктир. */
+/** Короткая «тропа» только вокруг открытого события: откуда пришли (сплошная) и куда дальше (пунктир).
+ *  Всю цепочку эпохи не рисуем — в насыщенных эпохах она превращается в паутину. */
 function setRoute(list: HistEvent[], cur: number) {
-  routeList = list;
+  routeList = cur >= 0 ? list : [];
   routeCur = cur;
   drawRoute();
 }
@@ -220,10 +221,10 @@ function drawRoute() {
   const key = JSON.stringify([pts, routeCur]);
   if (key === routeKey) return;
   routeKey = key;
-  const cut = Math.max(0, routeCur);
+  const c = routeCur;
   const feats: GeoJSON.Feature[] = [];
-  if (cut > 0) feats.push({ type: 'Feature', properties: { part: 'done' }, geometry: { type: 'LineString', coordinates: pts.slice(0, cut + 1) } });
-  if (pts.length - cut > 1) feats.push({ type: 'Feature', properties: { part: 'todo' }, geometry: { type: 'LineString', coordinates: pts.slice(cut) } });
+  if (c > 0) feats.push({ type: 'Feature', properties: { part: 'done' }, geometry: { type: 'LineString', coordinates: [pts[c - 1], pts[c]] } });
+  if (c >= 0 && c + 1 < pts.length) feats.push({ type: 'Feature', properties: { part: 'todo' }, geometry: { type: 'LineString', coordinates: [pts[c], pts[c + 1]] } });
   routeData = { type: 'FeatureCollection', features: feats };
   (map?.getSource('route') as maplibregl.GeoJSONSource | undefined)?.setData(routeData);
 }
@@ -252,7 +253,10 @@ function update(year: number) {
   // Без открытого события «текущим» считаем последнее событие, начавшееся к этому году.
   const cur = sel >= 0 ? sel : list.reduce((acc, e, i) => (e.start.year <= year ? i : acc), -1);
   const order = new Map(list.map((e, i) => [e.id, i]));
-  setRoute(list, cur);
+  setRoute(list, sel);
+  // Без открытого события подписываем только события текущего подпериода эпохи.
+  const ep = epochs.find((e) => e.id === epochId);
+  const sub = ep?.subperiods.find((p) => year >= p.start && year < p.end);
   map.getContainer().classList.toggle('story', sel >= 0);
   for (const { el, ev } of eventMarkers.values()) {
     const [a, b] = eventSpan(ev);
@@ -264,6 +268,9 @@ function update(year: number) {
       el.querySelector('span')!.textContent = `${i + 1}. ${ev.title}`;
       el.classList.toggle('done', i < cur);
       el.classList.toggle('upcoming', i > cur);
+      // Дальние от открытого события (или вне текущего подпериода) — мелкие и бледные.
+      const far = sel >= 0 ? Math.abs(i - sel) > 1 : !!sub && !(ev.start.year >= sub.start && ev.start.year < sub.end);
+      el.classList.toggle('far', far);
       el.style.zIndex = selected ? '5' : '';
     }
     el.classList.toggle('selected', selected);
