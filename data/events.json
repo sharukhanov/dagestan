@@ -43,7 +43,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/chokh-settlement.webp",
+      "imageType": "real",
+      "caption": "Современный аул Чох (Гунибский район)",
+      "author": "Alfred Schaerli",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A7%D0%BE%D1%85_3.JPG"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -178,7 +186,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/scythians-derbent.webp",
+      "imageType": "real",
+      "caption": "Скифский лучник на древнегреческой чаше (Музей изящных искусств, Бостон)",
+      "author": "Mark Landon",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red-figure_kylix_Scythian_archer_(Boston_MFA_01.8074).jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -322,7 +338,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/pompey-albania.webp",
+      "imageType": "real",
+      "caption": "Гней Помпей Великий. Античный мраморный портрет (Археологический музей, Венеция)",
+      "author": "Didier Descouens",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:(Venice)_Pompey_the_Great,_Museo_Archeologico_Nazionale.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -467,7 +490,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/derbent-stone-walls.webp",
+      "imageType": "real",
+      "caption": "Стена цитадели Нарын-кала в Дербенте",
+      "author": "Александр Байдуков",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Derbent._Naryn-Kala_citadel._The_curtain_wall.jpg"
+    },
     "sources": [
       {
         "id": "gadzhiev-2006-derbent",
@@ -643,7 +674,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/arab-first-campaigns.webp",
+      "imageType": "real",
+      "caption": "Ворота Кырхляр-капы в северной стене Дербента",
+      "author": "Alandislands",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kyrhlar_Kapy_Gates,_Northern_Gates,_City_Wall_Derbent,_July_2022.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -721,7 +760,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/marwan-737.webp",
+      "imageType": "real",
+      "caption": "Серебряный дирхам Марвана ибн Мухаммада — того самого полководца, позже халифа Марвана II",
+      "author": "Монетный двор Арабского халифата, VIII в.",
+      "license": "CC BY-SA 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dirham_of_Marwan_II_ibn_Muhammad,_AH_127-132.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -870,7 +917,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/serir.webp",
+      "imageType": "real",
+      "caption": "Хунзахское плато — земли, где, по мнению историков, была столица Серира",
+      "author": "Aslan4ik",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A5%D1%83%D0%BD%D0%B7%D0%B0%D1%85.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -937,7 +992,14 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/svyatoslav-965.webp",
+      "imageType": "reconstruction",
+      "caption": "К. Лебедев. Встреча Святослава с императором Иоанном Цимисхием (сцена 971 г., уже после похода на хазар)",
+      "author": "Клавдий Лебедев",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lebedev_Svyatoslavs_meeting_with_Emperor_John.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1016,7 +1078,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/mongols-richa-1239.webp",
+      "imageType": "real",
+      "caption": "Г. Гагарин. Мечеть в Риче (литография XIX в.)",
+      "author": "Григорий Григорьевич Гагарин",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gagarin._Daghestan_meridional._Mosquee_de_Ritcha.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1097,7 +1166,14 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/timur-1395.webp",
+      "imageType": "reconstruction",
+      "caption": "Тимур и его войско. Персидская миниатюра из «Зафар-наме» — книги о походах Тимура (список 1552 г.)",
+      "author": "Неизвестный персидский художник, 1552",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Folio_389v._Soldiers_marching_in_front_of_Timur,_Zafarnama,_Shiraz,_Iran,_1552.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1166,7 +1242,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/islam-derbent.webp",
+      "imageType": "real",
+      "caption": "Джума-мечеть в Дербенте",
+      "author": "Alfredovic",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Freitagsmoschee_Derbent.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1257,7 +1341,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/islam-kumukh.webp",
+      "imageType": "real",
+      "caption": "Джума-мечеть в Кумухе",
+      "author": "Asħab",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%9A%D1%83%D0%BC%D1%83%D1%85%D1%81%D0%BA%D0%B0%D1%8F_%D0%B4%D0%B6%D1%83%D0%BC%D0%B0-%D0%BC%D0%B5%D1%87%D0%B5%D1%82%D1%8C.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1449,7 +1541,14 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/andalal-1741.webp",
+      "imageType": "real",
+      "caption": "Надир-шах. Иранский портрет конца XVIII в.",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Painting,_portrait_of_Nader_Shah_seated_on_a_carpet,_oil_on_canvas,_probably_Tehran,_1780s_or_1790s.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1541,7 +1640,7 @@
     ],
     "image": {
       "file": "images/events/gunib-1859.webp",
-      "imageType": "real",
+      "imageType": "reconstruction",
       "caption": "А. Д. Кившенко. Шамиль перед главнокомандующим князем А. И. Барятинским 25 августа 1859 года (1880)",
       "author": "Кившенко, Алексей Данилович",
       "license": "Public domain",
@@ -1629,7 +1728,15 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/dagestan-autonomy-1920.webp",
+      "imageType": "real",
+      "caption": "Театр в Буйнакске (бывш. Темир-Хан-Шура), где в 1920 г. прошёл съезд народов Дагестана",
+      "author": "Пикри",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:014_%D0%A2%D0%B5%D0%B0%D1%82%D1%80.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t3",
@@ -1720,7 +1827,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/peter-1722.webp",
+      "imageType": "real",
+      "caption": "«Домик Петра I» в Дербенте — на месте, где стоял царь в 1722 г.",
+      "author": "Шамиль Магомедов",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%94%D0%BE%D0%BC%D0%B8%D0%BA_%D0%9F%D0%B5%D1%82%D1%80%D0%B0_%D0%86_%D0%B2_%D0%94%D0%B5%D1%80%D0%B1%D0%B5%D0%BD%D1%82%D0%B5.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -1798,7 +1913,14 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/petrovsk-1842.webp",
+      "imageType": "real",
+      "caption": "Порт Петровск на Каспии. Фотография конца XIX в.",
+      "author": "Шарль Гаше (Charles Gachet)",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tourkm%C3%A8nes_Tekk%C3%A8s._2,_Port_de_Petrovsk,_mer_Caspienne_-_(mission)_Gachet_;_(photographe)_Gachet_;_(photographie_probablement_reprod._par_Molteni_pour_la_conf%C3%A9rence_donn%C3%A9e_par)_Gachet_-_btv1b53286731n.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -1899,7 +2021,14 @@
         "relation": "before"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/gamzatov-1923.webp",
+      "imageType": "real",
+      "caption": "Расул Гамзатов. Фото из журнала 1952 г.",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rasul_Gamzatov_picture_from_1952_magazine.jpg"
+    },
     "sources": [
       {
         "id": "machkhelyan-2021",
@@ -1995,7 +2124,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/political-map-xvi.webp",
+      "imageType": "real",
+      "caption": "Аул Кала-Корейш — средневековый центр Кайтага",
+      "author": "Шамиль Магомедов",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%90%D1%83%D0%BB_%D0%9A%D0%B0%D0%BB%D0%B0-%D0%9A%D0%BE%D1%80%D0%B5%D0%B9%D1%88.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -2142,7 +2279,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/ismail-derbent-1509.webp",
+      "imageType": "real",
+      "caption": "Шах Исмаил I. Рисунок, приписываемый Бехзаду",
+      "author": "Кемаледдин Бехзад",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shah_Ismail_I_Safavid,_Behzad_(portrait_detail).jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -2224,7 +2368,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/buturlin-1604.webp",
+      "imageType": "real",
+      "caption": "Тарки — столица шамхальства. Гравюра из книги Адама Олеария (XVII в.)",
+      "author": "Adam Olearius, 1695",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tarki-capital-of-Kumyk-Shamkhalate-Adam-Olearius.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-2004",
@@ -2299,7 +2450,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/gulistan-1813.webp",
+      "imageType": "real",
+      "caption": "Страница Гюлистанского мирного договора 1813 г.",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Treaty_of_Gulistan_p22.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2371,7 +2529,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/gimry-1832.webp",
+      "imageType": "reconstruction",
+      "caption": "Ф. Рубо. Штурм Гимров 17 октября 1832 г. (1891)",
+      "author": "Франц Алексеевич Рубо",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A4%D1%80%D0%B0%D0%BD%D1%86_%D0%A0%D1%83%D0%B1%D0%BE_-_%D0%A8%D1%82%D1%83%D1%80%D0%BC_%D0%93%D0%B8%D0%BC%D1%80%D0%BE%D0%B2_17_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_1832_%D0%B3.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2455,7 +2620,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/akhulgo-1839.webp",
+      "imageType": "reconstruction",
+      "caption": "Ф. Рубо. Штурм аула Ахульго (1888)",
+      "author": "Франц Алексеевич Рубо",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A4%D1%80%D0%B0%D0%BD%D1%86_%D0%A0%D1%83%D0%B1%D0%BE_-_%D0%90%D1%85%D1%83%D0%BB%D1%8C%D0%B3%D0%BE_(1888).jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2530,7 +2702,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/dargo-1845.webp",
+      "imageType": "reconstruction",
+      "caption": "Ф. Рубо. Даргинский поход. Подвиг 3-го батальона Апшеронского полка (1895)",
+      "author": "Франц Алексеевич Рубо",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%94%D0%B0%D1%80%D0%B3%D0%B8%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%BF%D0%BE%D1%85%D0%BE%D0%B4._%D0%9F%D0%BE%D0%B4%D0%B2%D0%B8%D0%B3_3-%D0%B3%D0%BE_%D0%B1%D0%B0%D1%82.%D0%90%D0%BF%D1%88%D0%B5%D1%80%D0%BE%D0%BD%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_%D0%BF%D0%BE%D0%BB%D0%BA%D0%B0._%D1%80%D0%B8%D1%81.%D0%A0%D1%83%D0%B1%D0%BE_%D0%A4.%D0%90._1895%D0%B3_%D0%93%D0%98%D0%9C_e1.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2602,7 +2781,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/imamate-state.webp",
+      "imageType": "real",
+      "caption": "Имам Шамиль. Литография В. Ф. Тимма",
+      "author": "Василий Фёдорович Тимм",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Imam_Shamil_(cropped).jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2812,7 +2998,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/uprising-1877.webp",
+      "imageType": "real",
+      "caption": "Сожжённый Согратль после подавления восстания 1877 г.",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A1%D0%BE%D0%B6%D0%B6%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9_%D0%A1%D0%BE%D0%B3%D1%80%D0%B0%D1%82%D0%BB%D1%8C.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2882,7 +3075,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/railway-1894.webp",
+      "imageType": "real",
+      "caption": "Вокзал Петровска. Почтовая открытка начала XX в.",
+      "author": "Издатель неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D1%81%D0%BA-%D0%94%D0%B0%D0%B3%D0%B5%D1%81%D1%82%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9._%D0%92%D0%BE%D0%BA%D0%B7%D0%B0%D0%BB._%D0%9F%D0%BE%D1%87%D1%82%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BE%D1%82%D0%BA%D1%80%D1%8B%D1%82%D0%BA%D0%B0.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -2921,7 +3121,7 @@
     "dateLabel": "1914–1917",
     "place": "Дагестанская область",
     "coords": [
-      47.0,
+      47,
       42.85
     ],
     "epoch": "xix-second-half",
@@ -2951,7 +3151,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/ww1-1914.webp",
+      "imageType": "real",
+      "caption": "Офицеры 2-го Дагестанского конного полка («Дикая дивизия»)",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%93%D1%80%D1%83%D0%BF%D0%BF%D0%B0_%D0%BE%D1%84%D0%B8%D1%86%D0%B5%D1%80%D0%BE%D0%B2_2-%D0%B3%D0%BE_%D0%94%D0%B0%D0%B3%D0%B5%D1%81%D1%82%D0%B0%D0%BD%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_%D0%BA%D0%BE%D0%BD%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BF%D0%BE%D0%BB%D0%BA%D0%B0_%D0%94%D0%B8%D0%BA%D0%BE%D0%B9_%D0%B4%D0%B8%D0%B2%D0%B8%D0%B7%D0%B8%D0%B8.webp"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t2",
@@ -3021,7 +3228,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/power-changes-1918.webp",
+      "imageType": "real",
+      "caption": "Отряды Гоцинского и Узун-Хаджи в Темир-Хан-Шуре, 1918 г.",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gotsinsky_and_Uzun_Haji_detachments_in_Temir-Khan-Shura_1918.jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t3",
@@ -3096,7 +3310,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/denikin-1919.webp",
+      "imageType": "real",
+      "caption": "Генерал А. И. Деникин (раскрашенная фотография)",
+      "author": "SkoraPobeda (Colorized)",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Anton_Denikin_portrait_(colorized).png"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t3",
@@ -3184,7 +3405,14 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/uprising-1920.webp",
+      "imageType": "real",
+      "caption": "Нажмуддин Гоцинский",
+      "author": "Автор неизвестен",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gotsinskiy.jpeg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t3",
@@ -3228,7 +3456,7 @@
     "dateLabel": "1928–1939 гг.",
     "place": "Дагестанская АССР",
     "coords": [
-      47.0,
+      47,
       42.75
     ],
     "epoch": "soviet",
@@ -3353,7 +3581,15 @@
         "relation": "ledTo"
       }
     ],
-    "image": null,
+    "image": {
+      "file": "images/events/ww2-1941.webp",
+      "imageType": "real",
+      "caption": "Памятник умершим в госпиталях Избербаша в годы войны",
+      "author": "Дементьева Роман",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%B0%D0%BC%D1%8F%D1%82%D0%BD%D0%B8%D0%BA_%D0%BF%D0%BE%D0%B3%D0%B8%D0%B1%D1%88%D0%B8%D0%BC_%D0%B2_%D0%B3%D0%BE%D1%81%D0%BF%D0%B8%D1%82%D0%B0%D0%BB%D1%8F%D1%85_(%D0%98%D0%B7%D0%B1%D0%B5%D1%80%D0%B1%D0%B0%D1%88).jpg"
+    },
     "sources": [
       {
         "id": "istoriya-dagestana-1968-t3",
